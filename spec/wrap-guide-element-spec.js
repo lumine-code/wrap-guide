@@ -26,23 +26,23 @@ describe("WrapGuideElement", function () {
 
   describe("When always shown", function () {
     beforeEach(function () {
-      atom.config.set("wrap-guide.showWrapGuide", "always");
-      workspaceElement = atom.views.getView(atom.workspace);
+      lumine.config.set("wrap-guide.showWrapGuide", "always");
+      workspaceElement = lumine.views.getView(lumine.workspace);
       workspaceElement.style.height = "200px";
       workspaceElement.style.width = "1500px";
 
       jasmine.attachToDOM(workspaceElement);
 
-      waitsForPromise(() => atom.packages.activatePackage("wrap-guide"));
+      waitsForPromise(() => lumine.packages.activatePackage("wrap-guide"));
 
-      waitsForPromise(() => atom.packages.activatePackage("language-javascript"));
+      waitsForPromise(() => lumine.packages.activatePackage("language-javascript"));
 
-      waitsForPromise(() => atom.packages.activatePackage("language-coffee-script"));
+      waitsForPromise(() => lumine.packages.activatePackage("language-coffee-script"));
 
-      waitsForPromise(() => atom.workspace.open("sample.js"));
+      waitsForPromise(() => lumine.workspace.open("sample.js"));
 
       runs(function () {
-        editor = atom.workspace.getActiveTextEditor();
+        editor = lumine.workspace.getActiveTextEditor();
         editorElement = editor.getElement();
         wrapGuide = editorElement.querySelector(".wrap-guide-container");
       });
@@ -51,7 +51,7 @@ describe("WrapGuideElement", function () {
     describe(".activate", function () {
       const getWrapGuides = function () {
         const wrapGuides = [];
-        atom.workspace.getTextEditors().forEach(function (editor) {
+        lumine.workspace.getTextEditors().forEach(function (editor) {
           const guides = editor.getElement().querySelectorAll(".wrap-guide");
           if (guides) {
             return wrapGuides.push(guides);
@@ -61,13 +61,13 @@ describe("WrapGuideElement", function () {
       };
 
       it("appends a wrap guide to all existing and new editors", function () {
-        expect(atom.workspace.getTextEditors().length).toBe(1);
+        expect(lumine.workspace.getTextEditors().length).toBe(1);
 
         expect(getWrapGuides().length).toBe(1);
         expect(getLeftPosition(getWrapGuides()[0][0])).toBeGreaterThan(0);
 
-        atom.workspace.getActivePane().splitRight({ copyActiveItem: true });
-        expect(atom.workspace.getTextEditors().length).toBe(2);
+        lumine.workspace.getActivePane().splitRight({ copyActiveItem: true });
+        expect(lumine.workspace.getTextEditors().length).toBe(2);
         expect(getWrapGuides().length).toBe(2);
         expect(getLeftPosition(getWrapGuides()[0][0])).toBeGreaterThan(0);
         expect(getLeftPosition(getWrapGuides()[1][0])).toBeGreaterThan(0);
@@ -82,12 +82,12 @@ describe("WrapGuideElement", function () {
 
       it("appends multiple wrap guides to all existing and new editors", function () {
         const columns = [10, 20, 30];
-        atom.config.set("wrap-guide.columns", columns);
+        lumine.config.set("wrap-guide.columns", columns);
 
         waitsForPromise(() => editorElement.getComponent().getNextUpdatePromise());
 
         runs(function () {
-          expect(atom.workspace.getTextEditors().length).toBe(1);
+          expect(lumine.workspace.getTextEditors().length).toBe(1);
           expect(getWrapGuides().length).toBe(1);
           const positions = getLeftPositions(getWrapGuides()[0]);
           expect(positions.length).toBe(columns.length);
@@ -95,8 +95,8 @@ describe("WrapGuideElement", function () {
           expect(positions[1]).toBeGreaterThan(positions[0]);
           expect(positions[2]).toBeGreaterThan(positions[1]);
 
-          atom.workspace.getActivePane().splitRight({ copyActiveItem: true });
-          expect(atom.workspace.getTextEditors().length).toBe(2);
+          lumine.workspace.getActivePane().splitRight({ copyActiveItem: true });
+          expect(lumine.workspace.getTextEditors().length).toBe(2);
           expect(getWrapGuides().length).toBe(2);
           const pane1_positions = getLeftPositions(getWrapGuides()[0]);
           expect(pane1_positions.length).toBe(columns.length);
@@ -124,7 +124,7 @@ describe("WrapGuideElement", function () {
           columns.push(i * 10);
         }
 
-        atom.config.set("wrap-guide.columns", columns);
+        lumine.config.set("wrap-guide.columns", columns);
         waitsForPromise(() => editorElement.getComponent().getNextUpdatePromise());
 
         runs(function () {
@@ -146,8 +146,8 @@ describe("WrapGuideElement", function () {
       it("updates the wrap guide position", function () {
         const initial = getLeftPosition(wrapGuide.firstChild);
         expect(initial).toBeGreaterThan(0);
-        const fontSize = atom.config.get("editor.fontSize");
-        atom.config.set("editor.fontSize", fontSize + 10);
+        const fontSize = lumine.config.get("editor.fontSize");
+        lumine.config.set("editor.fontSize", fontSize + 10);
 
         waitsForPromise(() => editorElement.getComponent().getNextUpdatePromise());
 
@@ -161,11 +161,11 @@ describe("WrapGuideElement", function () {
         const initial = getLeftPosition(wrapGuide.firstChild);
         expect(initial).toBeGreaterThan(0);
 
-        await atom.workspace.open();
+        await lumine.workspace.open();
 
-        const fontSize = atom.config.get("editor.fontSize");
-        atom.config.set("editor.fontSize", fontSize + 10);
-        atom.workspace.getActivePane().activatePreviousItem();
+        const fontSize = lumine.config.get("editor.fontSize");
+        lumine.config.set("editor.fontSize", fontSize + 10);
+        lumine.workspace.getActivePane().activatePreviousItem();
 
         await waitForCondition(
           () => getLeftPosition(wrapGuide.firstChild) > initial,
@@ -180,8 +180,8 @@ describe("WrapGuideElement", function () {
       it("updates the wrap guide position", function () {
         const initial = getLeftPosition(wrapGuide.firstChild);
         expect(initial).toBeGreaterThan(0);
-        const column = atom.config.get("language.preferredLineLength");
-        atom.config.set("language.preferredLineLength", column + 10);
+        const column = lumine.config.get("language.preferredLineLength");
+        lumine.config.set("language.preferredLineLength", column + 10);
         expect(getLeftPosition(wrapGuide.firstChild)).toBeGreaterThan(initial);
         expect(wrapGuide).toBeVisible();
       }));
@@ -189,18 +189,18 @@ describe("WrapGuideElement", function () {
     describe("when the preferredLineLength changes", () =>
       it("updates the wrap guide positions", async function () {
         const initial = [10, 15, 20, 30];
-        atom.config.set("wrap-guide.columns", initial, {
+        lumine.config.set("wrap-guide.columns", initial, {
           scopeSelector: `.${editor.getGrammar().scopeName}`,
         });
 
         await waitForCondition(() => wrapGuide.children.length === initial.length, "wrap guides");
 
-        atom.config.set("language.preferredLineLength", 15, {
+        lumine.config.set("language.preferredLineLength", 15, {
           scopeSelector: `.${editor.getGrammar().scopeName}`,
         });
 
         await waitForCondition(() => {
-          const columns = atom.config.get("wrap-guide.columns", {
+          const columns = lumine.config.get("wrap-guide.columns", {
             scope: editor.getRootScopeDescriptor(),
           });
           return columns != null && columns.length === 2 && columns[0] === 10 && columns[1] === 15;
@@ -214,7 +214,7 @@ describe("WrapGuideElement", function () {
         expect(initial[0]).toBeGreaterThan(0);
 
         const columns = [10, 20, 30];
-        atom.config.set("wrap-guide.columns", columns);
+        lumine.config.set("wrap-guide.columns", columns);
         waitsForPromise(() => editorElement.getComponent().getNextUpdatePromise());
 
         runs(function () {
@@ -228,14 +228,14 @@ describe("WrapGuideElement", function () {
       });
 
       it("updates the preferredLineLength", function () {
-        const initial = atom.config.get("language.preferredLineLength", {
+        const initial = lumine.config.get("language.preferredLineLength", {
           scope: editor.getRootScopeDescriptor(),
         });
-        atom.config.set("wrap-guide.columns", [initial, initial + 10]);
+        lumine.config.set("wrap-guide.columns", [initial, initial + 10]);
         waitsForPromise(() => editorElement.getComponent().getNextUpdatePromise());
 
         runs(function () {
-          const length = atom.config.get("language.preferredLineLength", {
+          const length = lumine.config.get("language.preferredLineLength", {
             scope: editor.getRootScopeDescriptor(),
           });
           expect(length).toBe(initial + 10);
@@ -259,7 +259,7 @@ describe("WrapGuideElement", function () {
         expect(uniqueColumns[1]).toBeGreaterThan(uniqueColumns[0]);
         expect(uniqueColumns[2]).toBeGreaterThan(uniqueColumns[1]);
 
-        atom.config.set("wrap-guide.columns", columns);
+        lumine.config.set("wrap-guide.columns", columns);
         waitsForPromise(() => editorElement.getComponent().getNextUpdatePromise());
 
         runs(function () {
@@ -273,16 +273,16 @@ describe("WrapGuideElement", function () {
       });
 
       it("leaves alone preferredLineLength if modifyPreferredLineLength is false", () => {
-        const initial = atom.config.get("language.preferredLineLength", {
+        const initial = lumine.config.get("language.preferredLineLength", {
           scope: editor.getRootScopeDescriptor(),
         });
-        atom.config.set("wrap-guide.modifyPreferredLineLength", false);
+        lumine.config.set("wrap-guide.modifyPreferredLineLength", false);
 
-        atom.config.set("wrap-guide.columns", [initial, initial + 10]);
+        lumine.config.set("wrap-guide.columns", [initial, initial + 10]);
         waitsForPromise(() => editorElement.getComponent().getNextUpdatePromise());
 
         runs(() => {
-          const length = atom.config.get("language.preferredLineLength", {
+          const length = lumine.config.get("language.preferredLineLength", {
             scope: editor.getRootScopeDescriptor(),
           });
           expect(length).toBe(initial);
@@ -308,51 +308,51 @@ describe("WrapGuideElement", function () {
 
     describe("when the editor's grammar changes", function () {
       it("updates the wrap guide position", function () {
-        atom.config.set("language.preferredLineLength", 20, { scopeSelector: ".source.js" });
+        lumine.config.set("language.preferredLineLength", 20, { scopeSelector: ".source.js" });
         const initial = getLeftPosition(wrapGuide.firstChild);
         expect(initial).toBeGreaterThan(0);
         expect(wrapGuide).toBeVisible();
 
-        editor.setGrammar(atom.grammars.grammarForScopeName("text.plain.null-grammar"));
+        editor.setGrammar(lumine.grammars.grammarForScopeName("text.plain.null-grammar"));
         expect(getLeftPosition(wrapGuide.firstChild)).toBeGreaterThan(initial);
         expect(wrapGuide).toBeVisible();
       });
 
       it("listens for preferredLineLength updates for the new grammar", function () {
-        editor.setGrammar(atom.grammars.grammarForScopeName("source.coffee"));
+        editor.setGrammar(lumine.grammars.grammarForScopeName("source.coffee"));
         const initial = getLeftPosition(wrapGuide.firstChild);
-        atom.config.set("language.preferredLineLength", 20, { scopeSelector: ".source.coffee" });
+        lumine.config.set("language.preferredLineLength", 20, { scopeSelector: ".source.coffee" });
         expect(getLeftPosition(wrapGuide.firstChild)).toBeLessThan(initial);
       });
 
       it("listens for wrap-guide.enabled updates for the new grammar", function () {
-        editor.setGrammar(atom.grammars.grammarForScopeName("source.coffee"));
+        editor.setGrammar(lumine.grammars.grammarForScopeName("source.coffee"));
         expect(wrapGuide).toBeVisible();
-        atom.config.set("wrap-guide.enabled", false, { scopeSelector: ".source.coffee" });
+        lumine.config.set("wrap-guide.enabled", false, { scopeSelector: ".source.coffee" });
         expect(wrapGuide).not.toBeVisible();
       });
     });
 
     describe("scoped config", function () {
       it("::getDefaultColumn returns the scope-specific column value", function () {
-        atom.config.set("language.preferredLineLength", 132, { scopeSelector: ".source.js" });
+        lumine.config.set("language.preferredLineLength", 132, { scopeSelector: ".source.js" });
 
         expect(wrapGuide.getDefaultColumn()).toBe(132);
       });
 
       it("updates the guide when the scope-specific column changes", function () {
         const initial = getLeftPosition(wrapGuide.firstChild);
-        const column = atom.config.get("language.preferredLineLength", {
+        const column = lumine.config.get("language.preferredLineLength", {
           scope: editor.getRootScopeDescriptor(),
         });
-        atom.config.set("language.preferredLineLength", column + 10, { scope: ".source.js" });
+        lumine.config.set("language.preferredLineLength", column + 10, { scope: ".source.js" });
         expect(getLeftPosition(wrapGuide.firstChild)).toBeGreaterThan(initial);
       });
 
       it("updates the guide when wrap-guide.enabled is set to false", function () {
         expect(wrapGuide).toBeVisible();
 
-        atom.config.set("wrap-guide.enabled", false, { scopeSelector: ".source.js" });
+        lumine.config.set("wrap-guide.enabled", false, { scopeSelector: ".source.js" });
 
         expect(wrapGuide).not.toBeVisible();
       });
@@ -361,40 +361,40 @@ describe("WrapGuideElement", function () {
 
   describe("When only shown if wrapping at preferred line length", () => {
     beforeEach(() => {
-      atom.config.set("wrap-guide.showWrapGuide", "atPreferredLineLength");
+      lumine.config.set("wrap-guide.showWrapGuide", "atPreferredLineLength");
 
-      waitsForPromise(() => atom.packages.activatePackage("wrap-guide"));
+      waitsForPromise(() => lumine.packages.activatePackage("wrap-guide"));
 
-      waitsForPromise(() => atom.packages.activatePackage("language-javascript"));
+      waitsForPromise(() => lumine.packages.activatePackage("language-javascript"));
 
-      waitsForPromise(() => atom.packages.activatePackage("language-coffee-script"));
+      waitsForPromise(() => lumine.packages.activatePackage("language-coffee-script"));
 
-      waitsForPromise(() => atom.workspace.open("sample.txt"));
-      waitsForPromise(() => atom.workspace.open("sample.js"));
+      waitsForPromise(() => lumine.workspace.open("sample.txt"));
+      waitsForPromise(() => lumine.workspace.open("sample.js"));
     });
 
     describe("while the wrapping at preferred line length is active", () => {
       beforeEach(() => {
-        atom.config.set("language.softWrap", true);
-        atom.config.set("language.softWrapAtPreferredLineLength", true);
-        workspaceElement = atom.views.getView(atom.workspace);
+        lumine.config.set("language.softWrap", true);
+        lumine.config.set("language.softWrapAtPreferredLineLength", true);
+        workspaceElement = lumine.views.getView(lumine.workspace);
         workspaceElement.style.height = "200px";
         workspaceElement.style.width = "1500px";
 
         jasmine.attachToDOM(workspaceElement);
 
         runs(() => {
-          editor = atom.workspace.getActiveTextEditor();
+          editor = lumine.workspace.getActiveTextEditor();
           editorElement = editor.getElement();
           wrapGuide = editorElement.querySelector(".wrap-guide-container");
         });
       });
 
       it("should generate wrap-guides as usual until either wrappings are deactivated", () => {
-        expect(atom.workspace.getTextEditors().length).toBe(2);
+        expect(lumine.workspace.getTextEditors().length).toBe(2);
         function getWrapGuides() {
           const wrapGuides = [];
-          atom.workspace.getTextEditors().forEach((editor) => {
+          lumine.workspace.getTextEditors().forEach((editor) => {
             const guides = editor.getElement().querySelectorAll(".wrap-guide");
             if (guides && guides.length > 0) {
               return wrapGuides.push(guides);
@@ -405,65 +405,65 @@ describe("WrapGuideElement", function () {
         const scopeDescriptor = editor.getRootScopeDescriptor();
 
         expect([
-          atom.config.get("language.softWrap"),
-          atom.config.get("language.softWrapAtPreferredLineLength"),
+          lumine.config.get("language.softWrap"),
+          lumine.config.get("language.softWrapAtPreferredLineLength"),
         ]).toEqual([true, true]);
         expect(getWrapGuides().length).toBe(2);
 
-        atom.config.set("language.softWrap", false, {
+        lumine.config.set("language.softWrap", false, {
           scopeSelector: `.${editor.getGrammar().scopeName}`,
         });
 
         expect([
-          atom.config.get("language.softWrap"),
-          atom.config.get("language.softWrap", { scope: scopeDescriptor }),
+          lumine.config.get("language.softWrap"),
+          lumine.config.get("language.softWrap", { scope: scopeDescriptor }),
         ]).toEqual([true, false]);
 
         expect(getWrapGuides().length).toBe(1);
 
-        atom.config.set("language.softWrap", true, {
+        lumine.config.set("language.softWrap", true, {
           scopeSelector: `.${editor.getGrammar().scopeName}`,
         });
 
-        expect(atom.config.get("language.softWrap", { scope: scopeDescriptor })).toBe(true);
+        expect(lumine.config.get("language.softWrap", { scope: scopeDescriptor })).toBe(true);
         expect(getWrapGuides().length).toBe(2);
 
-        atom.config.set("language.softWrapAtPreferredLineLength", false, {
+        lumine.config.set("language.softWrapAtPreferredLineLength", false, {
           scopeSelector: `.${editor.getGrammar().scopeName}`,
         });
 
         expect([
-          atom.config.get("language.softWrapAtPreferredLineLength"),
-          atom.config.get("language.softWrapAtPreferredLineLength", { scope: scopeDescriptor }),
+          lumine.config.get("language.softWrapAtPreferredLineLength"),
+          lumine.config.get("language.softWrapAtPreferredLineLength", { scope: scopeDescriptor }),
         ]).toEqual([true, false]);
 
         expect(getWrapGuides().length).toBe(1);
 
-        atom.config.unset("language.softWrapAtPreferredLineLength", {
+        lumine.config.unset("language.softWrapAtPreferredLineLength", {
           scopeSelector: `.${editor.getGrammar().scopeName}`,
         });
 
         expect(
-          atom.config.get("language.softWrapAtPreferredLineLength", { scope: scopeDescriptor }),
+          lumine.config.get("language.softWrapAtPreferredLineLength", { scope: scopeDescriptor }),
         ).toBe(true);
 
         expect(getWrapGuides().length).toBe(2);
 
-        atom.config.set("language.softWrapAtPreferredLineLength", false);
+        lumine.config.set("language.softWrapAtPreferredLineLength", false);
 
         expect([
-          atom.config.get("language.softWrapAtPreferredLineLength"),
-          atom.config.get("language.softWrapAtPreferredLineLength", { scope: scopeDescriptor }),
+          lumine.config.get("language.softWrapAtPreferredLineLength"),
+          lumine.config.get("language.softWrapAtPreferredLineLength", { scope: scopeDescriptor }),
         ]).toEqual([false, false]);
 
         expect(getWrapGuides().length).toBe(0);
       });
 
       it("should adapt when changing the grammar", () => {
-        expect(atom.workspace.getTextEditors().length).toBe(2);
+        expect(lumine.workspace.getTextEditors().length).toBe(2);
         function getWrapGuides() {
           const wrapGuides = [];
-          atom.workspace.getTextEditors().forEach((editor) => {
+          lumine.workspace.getTextEditors().forEach((editor) => {
             const guides = editor.getElement().querySelectorAll(".wrap-guide");
             if (guides && guides.length > 0) {
               return wrapGuides.push(guides);
@@ -474,33 +474,35 @@ describe("WrapGuideElement", function () {
         const scopeDescriptor = editor.getRootScopeDescriptor();
 
         expect([
-          atom.config.get("language.softWrap"),
-          atom.config.get("language.softWrapAtPreferredLineLength"),
+          lumine.config.get("language.softWrap"),
+          lumine.config.get("language.softWrapAtPreferredLineLength"),
         ]).toEqual([true, true]);
         expect(getWrapGuides().length).toBe(2);
 
-        atom.config.set("language.softWrapAtPreferredLineLength", false, {
+        lumine.config.set("language.softWrapAtPreferredLineLength", false, {
           scopeSelector: `.${editor.getGrammar().scopeName}`,
         });
 
         expect([
-          atom.config.get("language.softWrapAtPreferredLineLength"),
-          atom.config.get("language.softWrapAtPreferredLineLength", { scope: scopeDescriptor }),
+          lumine.config.get("language.softWrapAtPreferredLineLength"),
+          lumine.config.get("language.softWrapAtPreferredLineLength", { scope: scopeDescriptor }),
         ]).toEqual([true, false]);
 
         expect(getWrapGuides().length).toBe(1);
 
-        editor.setGrammar(atom.grammars.grammarForScopeName("source.coffee"));
+        editor.setGrammar(lumine.grammars.grammarForScopeName("source.coffee"));
         const new_scopeDescriptor = editor.getRootScopeDescriptor();
 
         expect([
           scopeDescriptor != new_scopeDescriptor,
-          atom.config.get("language.softWrapAtPreferredLineLength", { scope: new_scopeDescriptor }),
+          lumine.config.get("language.softWrapAtPreferredLineLength", {
+            scope: new_scopeDescriptor,
+          }),
         ]).toEqual([true, true]);
 
         expect(getWrapGuides().length).toBe(2);
 
-        atom.config.set("language.softWrapAtPreferredLineLength", false, {
+        lumine.config.set("language.softWrapAtPreferredLineLength", false, {
           scopeSelector: `.${editor.getGrammar().scopeName}`,
         });
 
@@ -510,26 +512,26 @@ describe("WrapGuideElement", function () {
 
     describe("while the wrapping is inactive", () => {
       beforeEach(() => {
-        atom.config.set("language.softWrap", false);
-        atom.config.set("language.softWrapAtPreferredLineLength", false);
-        workspaceElement = atom.views.getView(atom.workspace);
+        lumine.config.set("language.softWrap", false);
+        lumine.config.set("language.softWrapAtPreferredLineLength", false);
+        workspaceElement = lumine.views.getView(lumine.workspace);
         workspaceElement.style.height = "200px";
         workspaceElement.style.width = "1500px";
 
         jasmine.attachToDOM(workspaceElement);
 
         runs(() => {
-          editor = atom.workspace.getActiveTextEditor();
+          editor = lumine.workspace.getActiveTextEditor();
           editorElement = editor.getElement();
           wrapGuide = editorElement.querySelector(".wrap-guide-container");
         });
       });
 
       it("should not generate wrap-guides until wrapping at preferred line length is reactivated", () => {
-        expect(atom.workspace.getTextEditors().length).toBe(2);
+        expect(lumine.workspace.getTextEditors().length).toBe(2);
         function getWrapGuides() {
           const wrapGuides = [];
-          atom.workspace.getTextEditors().forEach((editor) => {
+          lumine.workspace.getTextEditors().forEach((editor) => {
             const guides = editor.getElement().querySelectorAll(".wrap-guide");
             if (guides && guides.length > 0) {
               return wrapGuides.push(guides);
@@ -540,39 +542,39 @@ describe("WrapGuideElement", function () {
         const scopeDescriptor = editor.getRootScopeDescriptor();
 
         expect([
-          atom.config.get("language.softWrap"),
-          atom.config.get("language.softWrapAtPreferredLineLength"),
+          lumine.config.get("language.softWrap"),
+          lumine.config.get("language.softWrapAtPreferredLineLength"),
         ]).toEqual([false, false]);
         expect(getWrapGuides().length).toBe(0);
 
-        atom.config.set("language.softWrap", true, {
+        lumine.config.set("language.softWrap", true, {
           scopeSelector: `.${editor.getGrammar().scopeName}`,
         });
 
         expect([
-          atom.config.get("language.softWrap"),
-          atom.config.get("language.softWrap", { scope: scopeDescriptor }),
+          lumine.config.get("language.softWrap"),
+          lumine.config.get("language.softWrap", { scope: scopeDescriptor }),
         ]).toEqual([false, true]);
 
         expect(getWrapGuides().length).toBe(0);
 
-        atom.config.set("language.softWrapAtPreferredLineLength", true, {
+        lumine.config.set("language.softWrapAtPreferredLineLength", true, {
           scopeSelector: `.${editor.getGrammar().scopeName}`,
         });
 
         expect([
-          atom.config.get("language.softWrapAtPreferredLineLength"),
-          atom.config.get("language.softWrapAtPreferredLineLength", { scope: scopeDescriptor }),
+          lumine.config.get("language.softWrapAtPreferredLineLength"),
+          lumine.config.get("language.softWrapAtPreferredLineLength", { scope: scopeDescriptor }),
         ]).toEqual([false, true]);
 
         expect(getWrapGuides().length).toBe(1);
       });
 
       it("should adapt when changing to another mod", () => {
-        expect(atom.workspace.getTextEditors().length).toBe(2);
+        expect(lumine.workspace.getTextEditors().length).toBe(2);
         function getWrapGuides() {
           const wrapGuides = [];
-          atom.workspace.getTextEditors().forEach((editor) => {
+          lumine.workspace.getTextEditors().forEach((editor) => {
             const guides = editor.getElement().querySelectorAll(".wrap-guide");
             if (guides && guides.length > 0) {
               return wrapGuides.push(guides);
@@ -582,18 +584,18 @@ describe("WrapGuideElement", function () {
         }
 
         expect([
-          atom.config.get("language.softWrap"),
-          atom.config.get("language.softWrapAtPreferredLineLength"),
+          lumine.config.get("language.softWrap"),
+          lumine.config.get("language.softWrapAtPreferredLineLength"),
         ]).toEqual([false, false]);
         expect(getWrapGuides().length).toBe(0);
 
-        atom.config.set("language.softWrap", true, {
+        lumine.config.set("language.softWrap", true, {
           scopeSelector: `.${editor.getGrammar().scopeName}`,
         });
 
         expect(getWrapGuides().length).toBe(0);
 
-        atom.config.set("wrap-guide.showWrapGuide", "wrapping");
+        lumine.config.set("wrap-guide.showWrapGuide", "wrapping");
 
         expect(getWrapGuides().length).toBe(1);
       });
@@ -602,39 +604,39 @@ describe("WrapGuideElement", function () {
 
   describe("When only shown if wrapping", () => {
     beforeEach(() => {
-      atom.config.set("wrap-guide.showWrapGuide", "wrapping");
+      lumine.config.set("wrap-guide.showWrapGuide", "wrapping");
 
-      waitsForPromise(() => atom.packages.activatePackage("wrap-guide"));
+      waitsForPromise(() => lumine.packages.activatePackage("wrap-guide"));
 
-      waitsForPromise(() => atom.packages.activatePackage("language-javascript"));
+      waitsForPromise(() => lumine.packages.activatePackage("language-javascript"));
 
-      waitsForPromise(() => atom.packages.activatePackage("language-coffee-script"));
+      waitsForPromise(() => lumine.packages.activatePackage("language-coffee-script"));
 
-      waitsForPromise(() => atom.workspace.open("sample.txt"));
-      waitsForPromise(() => atom.workspace.open("sample.js"));
+      waitsForPromise(() => lumine.workspace.open("sample.txt"));
+      waitsForPromise(() => lumine.workspace.open("sample.js"));
     });
 
     describe("while the wrapping is active", () => {
       beforeEach(() => {
-        atom.config.set("language.softWrap", true);
-        workspaceElement = atom.views.getView(atom.workspace);
+        lumine.config.set("language.softWrap", true);
+        workspaceElement = lumine.views.getView(lumine.workspace);
         workspaceElement.style.height = "200px";
         workspaceElement.style.width = "1500px";
 
         jasmine.attachToDOM(workspaceElement);
 
         runs(() => {
-          editor = atom.workspace.getActiveTextEditor();
+          editor = lumine.workspace.getActiveTextEditor();
           editorElement = editor.getElement();
           wrapGuide = editorElement.querySelector(".wrap-guide-container");
         });
       });
 
       it("should generate wrap-guides as usual until wrapping is deactivated", () => {
-        expect(atom.workspace.getTextEditors().length).toBe(2);
+        expect(lumine.workspace.getTextEditors().length).toBe(2);
         function getWrapGuides() {
           const wrapGuides = [];
-          atom.workspace.getTextEditors().forEach((editor) => {
+          lumine.workspace.getTextEditors().forEach((editor) => {
             const guides = editor.getElement().querySelectorAll(".wrap-guide");
             if (guides && guides.length > 0) {
               return wrapGuides.push(guides);
@@ -643,16 +645,16 @@ describe("WrapGuideElement", function () {
           return wrapGuides;
         }
 
-        expect(atom.config.get("language.softWrap")).toBe(true);
+        expect(lumine.config.get("language.softWrap")).toBe(true);
         expect(getWrapGuides().length).toBe(2);
 
-        atom.config.set("language.softWrap", false, {
+        lumine.config.set("language.softWrap", false, {
           scopeSelector: `.${editor.getGrammar().scopeName}`,
         });
 
         expect([
-          atom.config.get("language.softWrap"),
-          atom.config.get("language.softWrap", { scope: editor.getRootScopeDescriptor() }),
+          lumine.config.get("language.softWrap"),
+          lumine.config.get("language.softWrap", { scope: editor.getRootScopeDescriptor() }),
         ]).toEqual([true, false]);
 
         expect(getWrapGuides().length).toBe(1);
@@ -661,25 +663,25 @@ describe("WrapGuideElement", function () {
 
     describe("while the wrapping is inactive", () => {
       beforeEach(() => {
-        atom.config.set("language.softWrap", false);
-        workspaceElement = atom.views.getView(atom.workspace);
+        lumine.config.set("language.softWrap", false);
+        workspaceElement = lumine.views.getView(lumine.workspace);
         workspaceElement.style.height = "200px";
         workspaceElement.style.width = "1500px";
 
         jasmine.attachToDOM(workspaceElement);
 
         runs(() => {
-          editor = atom.workspace.getActiveTextEditor();
+          editor = lumine.workspace.getActiveTextEditor();
           editorElement = editor.getElement();
           wrapGuide = editorElement.querySelector(".wrap-guide-container");
         });
       });
 
       it("should not generate wrap-guides until wrapping is reactivated", () => {
-        expect(atom.workspace.getTextEditors().length).toBe(2);
+        expect(lumine.workspace.getTextEditors().length).toBe(2);
         function getWrapGuides() {
           const wrapGuides = [];
-          atom.workspace.getTextEditors().forEach((editor) => {
+          lumine.workspace.getTextEditors().forEach((editor) => {
             const guides = editor.getElement().querySelectorAll(".wrap-guide");
             if (guides && guides.length > 0) {
               return wrapGuides.push(guides);
@@ -688,16 +690,16 @@ describe("WrapGuideElement", function () {
           return wrapGuides;
         }
 
-        expect(atom.config.get("language.softWrap")).toBe(false);
+        expect(lumine.config.get("language.softWrap")).toBe(false);
         expect(getWrapGuides().length).toBe(0);
 
-        atom.config.set("language.softWrap", true, {
+        lumine.config.set("language.softWrap", true, {
           scopeSelector: `.${editor.getGrammar().scopeName}`,
         });
 
         expect([
-          atom.config.get("language.softWrap"),
-          atom.config.get("language.softWrap", { scope: editor.getRootScopeDescriptor() }),
+          lumine.config.get("language.softWrap"),
+          lumine.config.get("language.softWrap", { scope: editor.getRootScopeDescriptor() }),
         ]).toEqual([false, true]);
 
         expect(getWrapGuides().length).toBe(1);

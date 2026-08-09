@@ -1,7 +1,7 @@
 const helpers = {
   getWrapGuides() {
     const wrapGuides = [];
-    for (const editor of atom.workspace.getTextEditors()) {
+    for (const editor of lumine.workspace.getTextEditors()) {
       const guide = editor.getElement().querySelector(".wrap-guide");
       if (guide) wrapGuides.push(guide);
     }

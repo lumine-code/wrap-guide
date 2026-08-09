@@ -47,7 +47,7 @@ Change the guide's themeable color and width by adding CSS to your `styles.css`:
   --wrap-guide-color: red;
 }
 
-atom-text-editor .wrap-guide {
+lumine-text-editor .wrap-guide {
   width: 10px;
 }
 ```
