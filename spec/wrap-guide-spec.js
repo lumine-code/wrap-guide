@@ -1,6 +1,5 @@
 const { getWrapGuides, getLeftPosition } = require("./helpers");
 
-
 describe("Wrap Guide", () => {
   let editor,
     editorElement,
