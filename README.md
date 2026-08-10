@@ -8,7 +8,7 @@ Displays a vertical line in the editor to guide line length.
 - **Preferred line length**: uses the `language.preferredLineLength` value, falling back to the 80th column.
 - **Multiple guides**: shows several guide lines at custom columns.
 - **Scoped control**: enables or disables the guide per language through scoped configuration.
-- **Styling**: lets you change the guide's color and width with your own CSS/LESS.
+- **Styling**: lets you change the guide's color and width with your own CSS.
 
 ## Installation
 
