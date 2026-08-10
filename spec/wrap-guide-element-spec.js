@@ -25,7 +25,7 @@ describe("WrapGuideElement", function () {
   let [editor, editorElement, wrapGuide, workspaceElement] = [];
 
   describe("When always shown", function () {
-    beforeEach(function () {
+    beforeEach(async () => {
       lumine.config.set("wrap-guide.showWrapGuide", "always");
       workspaceElement = lumine.views.getView(lumine.workspace);
       workspaceElement.style.height = "200px";
@@ -33,19 +33,17 @@ describe("WrapGuideElement", function () {
 
       jasmine.attachToDOM(workspaceElement);
 
-      waitsForPromise(() => lumine.packages.activatePackage("wrap-guide"));
+      await lumine.packages.activatePackage("wrap-guide");
 
-      waitsForPromise(() => lumine.packages.activatePackage("language-javascript"));
+      await lumine.packages.activatePackage("language-javascript");
 
-      waitsForPromise(() => lumine.packages.activatePackage("language-coffee-script"));
+      await lumine.packages.activatePackage("language-coffee-script");
 
-      waitsForPromise(() => lumine.workspace.open("sample.js"));
+      await lumine.workspace.open("sample.js");
 
-      runs(function () {
-        editor = lumine.workspace.getActiveTextEditor();
-        editorElement = editor.getElement();
-        wrapGuide = editorElement.querySelector(".wrap-guide-container");
-      });
+      editor = lumine.workspace.getActiveTextEditor();
+      editorElement = editor.getElement();
+      wrapGuide = editorElement.querySelector(".wrap-guide-container");
     });
 
     describe(".activate", function () {
@@ -80,38 +78,36 @@ describe("WrapGuideElement", function () {
         expect(wrapGuide).toBeVisible();
       });
 
-      it("appends multiple wrap guides to all existing and new editors", function () {
+      it("appends multiple wrap guides to all existing and new editors", async () => {
         const columns = [10, 20, 30];
         lumine.config.set("wrap-guide.columns", columns);
 
-        waitsForPromise(() => editorElement.getComponent().getNextUpdatePromise());
+        await editorElement.getComponent().getNextUpdatePromise();
 
-        runs(function () {
-          expect(lumine.workspace.getTextEditors().length).toBe(1);
-          expect(getWrapGuides().length).toBe(1);
-          const positions = getLeftPositions(getWrapGuides()[0]);
-          expect(positions.length).toBe(columns.length);
-          expect(positions[0]).toBeGreaterThan(0);
-          expect(positions[1]).toBeGreaterThan(positions[0]);
-          expect(positions[2]).toBeGreaterThan(positions[1]);
+        expect(lumine.workspace.getTextEditors().length).toBe(1);
+        expect(getWrapGuides().length).toBe(1);
+        const positions = getLeftPositions(getWrapGuides()[0]);
+        expect(positions.length).toBe(columns.length);
+        expect(positions[0]).toBeGreaterThan(0);
+        expect(positions[1]).toBeGreaterThan(positions[0]);
+        expect(positions[2]).toBeGreaterThan(positions[1]);
 
-          lumine.workspace.getActivePane().splitRight({ copyActiveItem: true });
-          expect(lumine.workspace.getTextEditors().length).toBe(2);
-          expect(getWrapGuides().length).toBe(2);
-          const pane1_positions = getLeftPositions(getWrapGuides()[0]);
-          expect(pane1_positions.length).toBe(columns.length);
-          expect(pane1_positions[0]).toBeGreaterThan(0);
-          expect(pane1_positions[1]).toBeGreaterThan(pane1_positions[0]);
-          expect(pane1_positions[2]).toBeGreaterThan(pane1_positions[1]);
-          const pane2_positions = getLeftPositions(getWrapGuides()[1]);
-          expect(pane2_positions.length).toBe(pane1_positions.length);
-          expect(pane2_positions[0]).toBe(pane1_positions[0]);
-          expect(pane2_positions[1]).toBe(pane1_positions[1]);
-          expect(pane2_positions[2]).toBe(pane1_positions[2]);
-        });
+        lumine.workspace.getActivePane().splitRight({ copyActiveItem: true });
+        expect(lumine.workspace.getTextEditors().length).toBe(2);
+        expect(getWrapGuides().length).toBe(2);
+        const pane1_positions = getLeftPositions(getWrapGuides()[0]);
+        expect(pane1_positions.length).toBe(columns.length);
+        expect(pane1_positions[0]).toBeGreaterThan(0);
+        expect(pane1_positions[1]).toBeGreaterThan(pane1_positions[0]);
+        expect(pane1_positions[2]).toBeGreaterThan(pane1_positions[1]);
+        const pane2_positions = getLeftPositions(getWrapGuides()[1]);
+        expect(pane2_positions.length).toBe(pane1_positions.length);
+        expect(pane2_positions[0]).toBe(pane1_positions[0]);
+        expect(pane2_positions[1]).toBe(pane1_positions[1]);
+        expect(pane2_positions[2]).toBe(pane1_positions[2]);
       });
 
-      it("positions multiple guides at the configured columns", function () {
+      it("positions multiple guides at the configured columns", async () => {
         // Previously used CoffeeScript below:
         /**
          * columnCount = 5
@@ -125,36 +121,32 @@ describe("WrapGuideElement", function () {
         }
 
         lumine.config.set("wrap-guide.columns", columns);
-        waitsForPromise(() => editorElement.getComponent().getNextUpdatePromise());
+        await editorElement.getComponent().getNextUpdatePromise();
 
-        runs(function () {
-          const positions = getLeftPositions(getWrapGuides()[0]);
-          expect(positions.length).toBe(columnCount);
-          expect(wrapGuide.children.length).toBe(columnCount);
+        const positions = getLeftPositions(getWrapGuides()[0]);
+        expect(positions.length).toBe(columnCount);
+        expect(wrapGuide.children.length).toBe(columnCount);
 
-          for (let i of Array.from(columnCount - 1)) {
-            const width = editor.getDefaultCharWidth() * columns[i];
-            expect(width).toBeGreaterThan(0);
-            expect(Math.abs(getLeftPosition(wrapGuide.children[i]) - width)).toBeLessThan(1);
-          }
-          expect(wrapGuide).toBeVisible();
-        });
+        for (let i of Array.from(columnCount - 1)) {
+          const width = editor.getDefaultCharWidth() * columns[i];
+          expect(width).toBeGreaterThan(0);
+          expect(Math.abs(getLeftPosition(wrapGuide.children[i]) - width)).toBeLessThan(1);
+        }
+        expect(wrapGuide).toBeVisible();
       });
     });
 
     describe("when the font size changes", function () {
-      it("updates the wrap guide position", function () {
+      it("updates the wrap guide position", async () => {
         const initial = getLeftPosition(wrapGuide.firstChild);
         expect(initial).toBeGreaterThan(0);
         const fontSize = lumine.config.get("editor.fontSize");
         lumine.config.set("editor.fontSize", fontSize + 10);
 
-        waitsForPromise(() => editorElement.getComponent().getNextUpdatePromise());
+        await editorElement.getComponent().getNextUpdatePromise();
 
-        runs(function () {
-          expect(getLeftPosition(wrapGuide.firstChild)).toBeGreaterThan(initial);
-          expect(wrapGuide.firstChild).toBeVisible();
-        });
+        expect(getLeftPosition(wrapGuide.firstChild)).toBeGreaterThan(initial);
+        expect(wrapGuide.firstChild).toBeVisible();
       });
 
       it("updates the wrap guide position for hidden editors when they become visible", async function () {
@@ -208,41 +200,37 @@ describe("WrapGuideElement", function () {
       }));
 
     describe("when the columns config changes", function () {
-      it("updates the wrap guide positions", function () {
+      it("updates the wrap guide positions", async () => {
         const initial = getLeftPositions(wrapGuide.children);
         expect(initial.length).toBe(1);
         expect(initial[0]).toBeGreaterThan(0);
 
         const columns = [10, 20, 30];
         lumine.config.set("wrap-guide.columns", columns);
-        waitsForPromise(() => editorElement.getComponent().getNextUpdatePromise());
+        await editorElement.getComponent().getNextUpdatePromise();
 
-        runs(function () {
-          const positions = getLeftPositions(wrapGuide.children);
-          expect(positions.length).toBe(columns.length);
-          expect(positions[0]).toBeGreaterThan(0);
-          expect(positions[1]).toBeGreaterThan(positions[0]);
-          expect(positions[2]).toBeGreaterThan(positions[1]);
-          expect(wrapGuide).toBeVisible();
-        });
+        const positions = getLeftPositions(wrapGuide.children);
+        expect(positions.length).toBe(columns.length);
+        expect(positions[0]).toBeGreaterThan(0);
+        expect(positions[1]).toBeGreaterThan(positions[0]);
+        expect(positions[2]).toBeGreaterThan(positions[1]);
+        expect(wrapGuide).toBeVisible();
       });
 
-      it("updates the preferredLineLength", function () {
+      it("updates the preferredLineLength", async () => {
         const initial = lumine.config.get("language.preferredLineLength", {
           scope: editor.getRootScopeDescriptor(),
         });
         lumine.config.set("wrap-guide.columns", [initial, initial + 10]);
-        waitsForPromise(() => editorElement.getComponent().getNextUpdatePromise());
+        await editorElement.getComponent().getNextUpdatePromise();
 
-        runs(function () {
-          const length = lumine.config.get("language.preferredLineLength", {
-            scope: editor.getRootScopeDescriptor(),
-          });
-          expect(length).toBe(initial + 10);
+        const length = lumine.config.get("language.preferredLineLength", {
+          scope: editor.getRootScopeDescriptor(),
         });
+        expect(length).toBe(initial + 10);
       });
 
-      it("keeps guide positions unique and in ascending order", function () {
+      it("keeps guide positions unique and in ascending order", async () => {
         const initial = getLeftPositions(wrapGuide.children);
         expect(initial.length).toBe(1);
         expect(initial[0]).toBeGreaterThan(0);
@@ -260,50 +248,44 @@ describe("WrapGuideElement", function () {
         expect(uniqueColumns[2]).toBeGreaterThan(uniqueColumns[1]);
 
         lumine.config.set("wrap-guide.columns", columns);
-        waitsForPromise(() => editorElement.getComponent().getNextUpdatePromise());
+        await editorElement.getComponent().getNextUpdatePromise();
 
-        runs(function () {
-          const positions = getLeftPositions(wrapGuide.children);
-          expect(positions.length).toBe(uniqueColumns.length);
-          expect(positions[0]).toBeGreaterThan(0);
-          expect(positions[1]).toBeGreaterThan(positions[0]);
-          expect(positions[2]).toBeGreaterThan(positions[1]);
-          expect(wrapGuide).toBeVisible();
-        });
+        const positions = getLeftPositions(wrapGuide.children);
+        expect(positions.length).toBe(uniqueColumns.length);
+        expect(positions[0]).toBeGreaterThan(0);
+        expect(positions[1]).toBeGreaterThan(positions[0]);
+        expect(positions[2]).toBeGreaterThan(positions[1]);
+        expect(wrapGuide).toBeVisible();
       });
 
-      it("leaves alone preferredLineLength if modifyPreferredLineLength is false", () => {
+      it("leaves alone preferredLineLength if modifyPreferredLineLength is false", async () => {
         const initial = lumine.config.get("language.preferredLineLength", {
           scope: editor.getRootScopeDescriptor(),
         });
         lumine.config.set("wrap-guide.modifyPreferredLineLength", false);
 
         lumine.config.set("wrap-guide.columns", [initial, initial + 10]);
-        waitsForPromise(() => editorElement.getComponent().getNextUpdatePromise());
+        await editorElement.getComponent().getNextUpdatePromise();
 
-        runs(() => {
-          const length = lumine.config.get("language.preferredLineLength", {
-            scope: editor.getRootScopeDescriptor(),
-          });
-          expect(length).toBe(initial);
+        const length = lumine.config.get("language.preferredLineLength", {
+          scope: editor.getRootScopeDescriptor(),
         });
+        expect(length).toBe(initial);
       });
     });
 
     describe("when the editor's scroll left changes", () =>
-      it("updates the wrap guide position to a relative position on screen", function () {
+      it("updates the wrap guide position to a relative position on screen", async () => {
         editor.setText("a long line which causes the editor to scroll");
         editorElement.style.width = "100px";
 
-        waitsFor(() => editorElement.component.getMaxScrollLeft() > 10);
+        await conditionPromise(() => editorElement.component.getMaxScrollLeft() > 10);
 
-        runs(function () {
-          const initial = getLeftPosition(wrapGuide.firstChild);
-          expect(initial).toBeGreaterThan(0);
-          editorElement.setScrollLeft(10);
-          expect(getLeftPosition(wrapGuide.firstChild)).toBe(initial - 10);
-          expect(wrapGuide.firstChild).toBeVisible();
-        });
+        const initial = getLeftPosition(wrapGuide.firstChild);
+        expect(initial).toBeGreaterThan(0);
+        editorElement.setScrollLeft(10);
+        expect(getLeftPosition(wrapGuide.firstChild)).toBe(initial - 10);
+        expect(wrapGuide.firstChild).toBeVisible();
       }));
 
     describe("when the editor's grammar changes", function () {
@@ -360,21 +342,21 @@ describe("WrapGuideElement", function () {
   });
 
   describe("When only shown if wrapping at preferred line length", () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       lumine.config.set("wrap-guide.showWrapGuide", "atPreferredLineLength");
 
-      waitsForPromise(() => lumine.packages.activatePackage("wrap-guide"));
+      await lumine.packages.activatePackage("wrap-guide");
 
-      waitsForPromise(() => lumine.packages.activatePackage("language-javascript"));
+      await lumine.packages.activatePackage("language-javascript");
 
-      waitsForPromise(() => lumine.packages.activatePackage("language-coffee-script"));
+      await lumine.packages.activatePackage("language-coffee-script");
 
-      waitsForPromise(() => lumine.workspace.open("sample.txt"));
-      waitsForPromise(() => lumine.workspace.open("sample.js"));
+      await lumine.workspace.open("sample.txt");
+      await lumine.workspace.open("sample.js");
     });
 
     describe("while the wrapping at preferred line length is active", () => {
-      beforeEach(() => {
+      beforeEach(async () => {
         lumine.config.set("language.softWrap", true);
         lumine.config.set("language.softWrapAtPreferredLineLength", true);
         workspaceElement = lumine.views.getView(lumine.workspace);
@@ -383,11 +365,9 @@ describe("WrapGuideElement", function () {
 
         jasmine.attachToDOM(workspaceElement);
 
-        runs(() => {
-          editor = lumine.workspace.getActiveTextEditor();
-          editorElement = editor.getElement();
-          wrapGuide = editorElement.querySelector(".wrap-guide-container");
-        });
+        editor = lumine.workspace.getActiveTextEditor();
+        editorElement = editor.getElement();
+        wrapGuide = editorElement.querySelector(".wrap-guide-container");
       });
 
       it("should generate wrap-guides as usual until either wrappings are deactivated", () => {
@@ -511,7 +491,7 @@ describe("WrapGuideElement", function () {
     });
 
     describe("while the wrapping is inactive", () => {
-      beforeEach(() => {
+      beforeEach(async () => {
         lumine.config.set("language.softWrap", false);
         lumine.config.set("language.softWrapAtPreferredLineLength", false);
         workspaceElement = lumine.views.getView(lumine.workspace);
@@ -520,11 +500,9 @@ describe("WrapGuideElement", function () {
 
         jasmine.attachToDOM(workspaceElement);
 
-        runs(() => {
-          editor = lumine.workspace.getActiveTextEditor();
-          editorElement = editor.getElement();
-          wrapGuide = editorElement.querySelector(".wrap-guide-container");
-        });
+        editor = lumine.workspace.getActiveTextEditor();
+        editorElement = editor.getElement();
+        wrapGuide = editorElement.querySelector(".wrap-guide-container");
       });
 
       it("should not generate wrap-guides until wrapping at preferred line length is reactivated", () => {
@@ -603,21 +581,21 @@ describe("WrapGuideElement", function () {
   });
 
   describe("When only shown if wrapping", () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       lumine.config.set("wrap-guide.showWrapGuide", "wrapping");
 
-      waitsForPromise(() => lumine.packages.activatePackage("wrap-guide"));
+      await lumine.packages.activatePackage("wrap-guide");
 
-      waitsForPromise(() => lumine.packages.activatePackage("language-javascript"));
+      await lumine.packages.activatePackage("language-javascript");
 
-      waitsForPromise(() => lumine.packages.activatePackage("language-coffee-script"));
+      await lumine.packages.activatePackage("language-coffee-script");
 
-      waitsForPromise(() => lumine.workspace.open("sample.txt"));
-      waitsForPromise(() => lumine.workspace.open("sample.js"));
+      await lumine.workspace.open("sample.txt");
+      await lumine.workspace.open("sample.js");
     });
 
     describe("while the wrapping is active", () => {
-      beforeEach(() => {
+      beforeEach(async () => {
         lumine.config.set("language.softWrap", true);
         workspaceElement = lumine.views.getView(lumine.workspace);
         workspaceElement.style.height = "200px";
@@ -625,11 +603,9 @@ describe("WrapGuideElement", function () {
 
         jasmine.attachToDOM(workspaceElement);
 
-        runs(() => {
-          editor = lumine.workspace.getActiveTextEditor();
-          editorElement = editor.getElement();
-          wrapGuide = editorElement.querySelector(".wrap-guide-container");
-        });
+        editor = lumine.workspace.getActiveTextEditor();
+        editorElement = editor.getElement();
+        wrapGuide = editorElement.querySelector(".wrap-guide-container");
       });
 
       it("should generate wrap-guides as usual until wrapping is deactivated", () => {
@@ -662,7 +638,7 @@ describe("WrapGuideElement", function () {
     });
 
     describe("while the wrapping is inactive", () => {
-      beforeEach(() => {
+      beforeEach(async () => {
         lumine.config.set("language.softWrap", false);
         workspaceElement = lumine.views.getView(lumine.workspace);
         workspaceElement.style.height = "200px";
@@ -670,11 +646,9 @@ describe("WrapGuideElement", function () {
 
         jasmine.attachToDOM(workspaceElement);
 
-        runs(() => {
-          editor = lumine.workspace.getActiveTextEditor();
-          editorElement = editor.getElement();
-          wrapGuide = editorElement.querySelector(".wrap-guide-container");
-        });
+        editor = lumine.workspace.getActiveTextEditor();
+        editorElement = editor.getElement();
+        wrapGuide = editorElement.querySelector(".wrap-guide-container");
       });
 
       it("should not generate wrap-guides until wrapping is reactivated", () => {
