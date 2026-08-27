@@ -172,8 +172,8 @@ describe("WrapGuideElement", function () {
       it("updates the wrap guide position", function () {
         const initial = getLeftPosition(wrapGuide.firstChild);
         expect(initial).toBeGreaterThan(0);
-        const column = lumine.config.get("language.preferredLineLength");
-        lumine.config.set("language.preferredLineLength", column + 10);
+        const column = lumine.config.get("editor.preferredLineLength");
+        lumine.config.set("editor.preferredLineLength", column + 10);
         expect(getLeftPosition(wrapGuide.firstChild)).toBeGreaterThan(initial);
         expect(wrapGuide).toBeVisible();
       }));
@@ -187,7 +187,7 @@ describe("WrapGuideElement", function () {
 
         await waitForCondition(() => wrapGuide.children.length === initial.length, "wrap guides");
 
-        lumine.config.set("language.preferredLineLength", 15, {
+        lumine.config.set("editor.preferredLineLength", 15, {
           scopeSelector: `.${editor.getGrammar().scopeName}`,
         });
 
@@ -218,13 +218,13 @@ describe("WrapGuideElement", function () {
       });
 
       it("updates the preferredLineLength", async () => {
-        const initial = lumine.config.get("language.preferredLineLength", {
+        const initial = lumine.config.get("editor.preferredLineLength", {
           scope: editor.getRootScopeDescriptor(),
         });
         lumine.config.set("wrap-guide.columns", [initial, initial + 10]);
         await editorElement.getComponent().getNextUpdatePromise();
 
-        const length = lumine.config.get("language.preferredLineLength", {
+        const length = lumine.config.get("editor.preferredLineLength", {
           scope: editor.getRootScopeDescriptor(),
         });
         expect(length).toBe(initial + 10);
@@ -259,7 +259,7 @@ describe("WrapGuideElement", function () {
       });
 
       it("leaves alone preferredLineLength if modifyPreferredLineLength is false", async () => {
-        const initial = lumine.config.get("language.preferredLineLength", {
+        const initial = lumine.config.get("editor.preferredLineLength", {
           scope: editor.getRootScopeDescriptor(),
         });
         lumine.config.set("wrap-guide.modifyPreferredLineLength", false);
@@ -267,7 +267,7 @@ describe("WrapGuideElement", function () {
         lumine.config.set("wrap-guide.columns", [initial, initial + 10]);
         await editorElement.getComponent().getNextUpdatePromise();
 
-        const length = lumine.config.get("language.preferredLineLength", {
+        const length = lumine.config.get("editor.preferredLineLength", {
           scope: editor.getRootScopeDescriptor(),
         });
         expect(length).toBe(initial);
@@ -290,7 +290,7 @@ describe("WrapGuideElement", function () {
 
     describe("when the editor's grammar changes", function () {
       it("updates the wrap guide position", function () {
-        lumine.config.set("language.preferredLineLength", 20, { scopeSelector: ".source.js" });
+        lumine.config.set("editor.preferredLineLength", 20, { scopeSelector: ".source.js" });
         const initial = getLeftPosition(wrapGuide.firstChild);
         expect(initial).toBeGreaterThan(0);
         expect(wrapGuide).toBeVisible();
@@ -303,7 +303,7 @@ describe("WrapGuideElement", function () {
       it("listens for preferredLineLength updates for the new grammar", function () {
         editor.setGrammar(lumine.grammars.grammarForScopeName("source.coffee"));
         const initial = getLeftPosition(wrapGuide.firstChild);
-        lumine.config.set("language.preferredLineLength", 20, { scopeSelector: ".source.coffee" });
+        lumine.config.set("editor.preferredLineLength", 20, { scopeSelector: ".source.coffee" });
         expect(getLeftPosition(wrapGuide.firstChild)).toBeLessThan(initial);
       });
 
@@ -317,17 +317,19 @@ describe("WrapGuideElement", function () {
 
     describe("scoped config", function () {
       it("::getDefaultColumn returns the scope-specific column value", function () {
-        lumine.config.set("language.preferredLineLength", 132, { scopeSelector: ".source.js" });
+        lumine.config.set("editor.preferredLineLength", 132, { scopeSelector: ".source.js" });
 
         expect(wrapGuide.getDefaultColumn()).toBe(132);
       });
 
       it("updates the guide when the scope-specific column changes", function () {
         const initial = getLeftPosition(wrapGuide.firstChild);
-        const column = lumine.config.get("language.preferredLineLength", {
+        const column = lumine.config.get("editor.preferredLineLength", {
           scope: editor.getRootScopeDescriptor(),
         });
-        lumine.config.set("language.preferredLineLength", column + 10, { scope: ".source.js" });
+        lumine.config.set("editor.preferredLineLength", column + 10, {
+          scopeSelector: ".source.js",
+        });
         expect(getLeftPosition(wrapGuide.firstChild)).toBeGreaterThan(initial);
       });
 
@@ -357,8 +359,8 @@ describe("WrapGuideElement", function () {
 
     describe("while the wrapping at preferred line length is active", () => {
       beforeEach(async () => {
-        lumine.config.set("language.softWrap", true);
-        lumine.config.set("language.softWrapAtPreferredLineLength", true);
+        lumine.config.set("editor.softWrap", true);
+        lumine.config.set("editor.softWrapAtPreferredLineLength", true);
         workspaceElement = lumine.views.getView(lumine.workspace);
         workspaceElement.style.height = "200px";
         workspaceElement.style.width = "1500px";
@@ -385,55 +387,55 @@ describe("WrapGuideElement", function () {
         const scopeDescriptor = editor.getRootScopeDescriptor();
 
         expect([
-          lumine.config.get("language.softWrap"),
-          lumine.config.get("language.softWrapAtPreferredLineLength"),
+          lumine.config.get("editor.softWrap"),
+          lumine.config.get("editor.softWrapAtPreferredLineLength"),
         ]).toEqual([true, true]);
         expect(getWrapGuides().length).toBe(2);
 
-        lumine.config.set("language.softWrap", false, {
+        lumine.config.set("editor.softWrap", false, {
           scopeSelector: `.${editor.getGrammar().scopeName}`,
         });
 
         expect([
-          lumine.config.get("language.softWrap"),
-          lumine.config.get("language.softWrap", { scope: scopeDescriptor }),
+          lumine.config.get("editor.softWrap"),
+          lumine.config.get("editor.softWrap", { scope: scopeDescriptor }),
         ]).toEqual([true, false]);
 
         expect(getWrapGuides().length).toBe(1);
 
-        lumine.config.set("language.softWrap", true, {
+        lumine.config.set("editor.softWrap", true, {
           scopeSelector: `.${editor.getGrammar().scopeName}`,
         });
 
-        expect(lumine.config.get("language.softWrap", { scope: scopeDescriptor })).toBe(true);
+        expect(lumine.config.get("editor.softWrap", { scope: scopeDescriptor })).toBe(true);
         expect(getWrapGuides().length).toBe(2);
 
-        lumine.config.set("language.softWrapAtPreferredLineLength", false, {
+        lumine.config.set("editor.softWrapAtPreferredLineLength", false, {
           scopeSelector: `.${editor.getGrammar().scopeName}`,
         });
 
         expect([
-          lumine.config.get("language.softWrapAtPreferredLineLength"),
-          lumine.config.get("language.softWrapAtPreferredLineLength", { scope: scopeDescriptor }),
+          lumine.config.get("editor.softWrapAtPreferredLineLength"),
+          lumine.config.get("editor.softWrapAtPreferredLineLength", { scope: scopeDescriptor }),
         ]).toEqual([true, false]);
 
         expect(getWrapGuides().length).toBe(1);
 
-        lumine.config.unset("language.softWrapAtPreferredLineLength", {
+        lumine.config.unset("editor.softWrapAtPreferredLineLength", {
           scopeSelector: `.${editor.getGrammar().scopeName}`,
         });
 
         expect(
-          lumine.config.get("language.softWrapAtPreferredLineLength", { scope: scopeDescriptor }),
+          lumine.config.get("editor.softWrapAtPreferredLineLength", { scope: scopeDescriptor }),
         ).toBe(true);
 
         expect(getWrapGuides().length).toBe(2);
 
-        lumine.config.set("language.softWrapAtPreferredLineLength", false);
+        lumine.config.set("editor.softWrapAtPreferredLineLength", false);
 
         expect([
-          lumine.config.get("language.softWrapAtPreferredLineLength"),
-          lumine.config.get("language.softWrapAtPreferredLineLength", { scope: scopeDescriptor }),
+          lumine.config.get("editor.softWrapAtPreferredLineLength"),
+          lumine.config.get("editor.softWrapAtPreferredLineLength", { scope: scopeDescriptor }),
         ]).toEqual([false, false]);
 
         expect(getWrapGuides().length).toBe(0);
@@ -454,18 +456,18 @@ describe("WrapGuideElement", function () {
         const scopeDescriptor = editor.getRootScopeDescriptor();
 
         expect([
-          lumine.config.get("language.softWrap"),
-          lumine.config.get("language.softWrapAtPreferredLineLength"),
+          lumine.config.get("editor.softWrap"),
+          lumine.config.get("editor.softWrapAtPreferredLineLength"),
         ]).toEqual([true, true]);
         expect(getWrapGuides().length).toBe(2);
 
-        lumine.config.set("language.softWrapAtPreferredLineLength", false, {
+        lumine.config.set("editor.softWrapAtPreferredLineLength", false, {
           scopeSelector: `.${editor.getGrammar().scopeName}`,
         });
 
         expect([
-          lumine.config.get("language.softWrapAtPreferredLineLength"),
-          lumine.config.get("language.softWrapAtPreferredLineLength", { scope: scopeDescriptor }),
+          lumine.config.get("editor.softWrapAtPreferredLineLength"),
+          lumine.config.get("editor.softWrapAtPreferredLineLength", { scope: scopeDescriptor }),
         ]).toEqual([true, false]);
 
         expect(getWrapGuides().length).toBe(1);
@@ -475,14 +477,14 @@ describe("WrapGuideElement", function () {
 
         expect([
           scopeDescriptor != new_scopeDescriptor,
-          lumine.config.get("language.softWrapAtPreferredLineLength", {
+          lumine.config.get("editor.softWrapAtPreferredLineLength", {
             scope: new_scopeDescriptor,
           }),
         ]).toEqual([true, true]);
 
         expect(getWrapGuides().length).toBe(2);
 
-        lumine.config.set("language.softWrapAtPreferredLineLength", false, {
+        lumine.config.set("editor.softWrapAtPreferredLineLength", false, {
           scopeSelector: `.${editor.getGrammar().scopeName}`,
         });
 
@@ -492,8 +494,8 @@ describe("WrapGuideElement", function () {
 
     describe("while the wrapping is inactive", () => {
       beforeEach(async () => {
-        lumine.config.set("language.softWrap", false);
-        lumine.config.set("language.softWrapAtPreferredLineLength", false);
+        lumine.config.set("editor.softWrap", false);
+        lumine.config.set("editor.softWrapAtPreferredLineLength", false);
         workspaceElement = lumine.views.getView(lumine.workspace);
         workspaceElement.style.height = "200px";
         workspaceElement.style.width = "1500px";
@@ -520,29 +522,29 @@ describe("WrapGuideElement", function () {
         const scopeDescriptor = editor.getRootScopeDescriptor();
 
         expect([
-          lumine.config.get("language.softWrap"),
-          lumine.config.get("language.softWrapAtPreferredLineLength"),
+          lumine.config.get("editor.softWrap"),
+          lumine.config.get("editor.softWrapAtPreferredLineLength"),
         ]).toEqual([false, false]);
         expect(getWrapGuides().length).toBe(0);
 
-        lumine.config.set("language.softWrap", true, {
+        lumine.config.set("editor.softWrap", true, {
           scopeSelector: `.${editor.getGrammar().scopeName}`,
         });
 
         expect([
-          lumine.config.get("language.softWrap"),
-          lumine.config.get("language.softWrap", { scope: scopeDescriptor }),
+          lumine.config.get("editor.softWrap"),
+          lumine.config.get("editor.softWrap", { scope: scopeDescriptor }),
         ]).toEqual([false, true]);
 
         expect(getWrapGuides().length).toBe(0);
 
-        lumine.config.set("language.softWrapAtPreferredLineLength", true, {
+        lumine.config.set("editor.softWrapAtPreferredLineLength", true, {
           scopeSelector: `.${editor.getGrammar().scopeName}`,
         });
 
         expect([
-          lumine.config.get("language.softWrapAtPreferredLineLength"),
-          lumine.config.get("language.softWrapAtPreferredLineLength", { scope: scopeDescriptor }),
+          lumine.config.get("editor.softWrapAtPreferredLineLength"),
+          lumine.config.get("editor.softWrapAtPreferredLineLength", { scope: scopeDescriptor }),
         ]).toEqual([false, true]);
 
         expect(getWrapGuides().length).toBe(1);
@@ -562,12 +564,12 @@ describe("WrapGuideElement", function () {
         }
 
         expect([
-          lumine.config.get("language.softWrap"),
-          lumine.config.get("language.softWrapAtPreferredLineLength"),
+          lumine.config.get("editor.softWrap"),
+          lumine.config.get("editor.softWrapAtPreferredLineLength"),
         ]).toEqual([false, false]);
         expect(getWrapGuides().length).toBe(0);
 
-        lumine.config.set("language.softWrap", true, {
+        lumine.config.set("editor.softWrap", true, {
           scopeSelector: `.${editor.getGrammar().scopeName}`,
         });
 
@@ -596,7 +598,7 @@ describe("WrapGuideElement", function () {
 
     describe("while the wrapping is active", () => {
       beforeEach(async () => {
-        lumine.config.set("language.softWrap", true);
+        lumine.config.set("editor.softWrap", true);
         workspaceElement = lumine.views.getView(lumine.workspace);
         workspaceElement.style.height = "200px";
         workspaceElement.style.width = "1500px";
@@ -621,16 +623,16 @@ describe("WrapGuideElement", function () {
           return wrapGuides;
         }
 
-        expect(lumine.config.get("language.softWrap")).toBe(true);
+        expect(lumine.config.get("editor.softWrap")).toBe(true);
         expect(getWrapGuides().length).toBe(2);
 
-        lumine.config.set("language.softWrap", false, {
+        lumine.config.set("editor.softWrap", false, {
           scopeSelector: `.${editor.getGrammar().scopeName}`,
         });
 
         expect([
-          lumine.config.get("language.softWrap"),
-          lumine.config.get("language.softWrap", { scope: editor.getRootScopeDescriptor() }),
+          lumine.config.get("editor.softWrap"),
+          lumine.config.get("editor.softWrap", { scope: editor.getRootScopeDescriptor() }),
         ]).toEqual([true, false]);
 
         expect(getWrapGuides().length).toBe(1);
@@ -639,7 +641,7 @@ describe("WrapGuideElement", function () {
 
     describe("while the wrapping is inactive", () => {
       beforeEach(async () => {
-        lumine.config.set("language.softWrap", false);
+        lumine.config.set("editor.softWrap", false);
         workspaceElement = lumine.views.getView(lumine.workspace);
         workspaceElement.style.height = "200px";
         workspaceElement.style.width = "1500px";
@@ -664,16 +666,16 @@ describe("WrapGuideElement", function () {
           return wrapGuides;
         }
 
-        expect(lumine.config.get("language.softWrap")).toBe(false);
+        expect(lumine.config.get("editor.softWrap")).toBe(false);
         expect(getWrapGuides().length).toBe(0);
 
-        lumine.config.set("language.softWrap", true, {
+        lumine.config.set("editor.softWrap", true, {
           scopeSelector: `.${editor.getGrammar().scopeName}`,
         });
 
         expect([
-          lumine.config.get("language.softWrap"),
-          lumine.config.get("language.softWrap", { scope: editor.getRootScopeDescriptor() }),
+          lumine.config.get("editor.softWrap"),
+          lumine.config.get("editor.softWrap", { scope: editor.getRootScopeDescriptor() }),
         ]).toEqual([false, true]);
 
         expect(getWrapGuides().length).toBe(1);

@@ -35,7 +35,7 @@
   "configSchema": {
     "columns": {
       "title": "Columns",
-      "description": "Display guides at each of the listed character widths. Leave blank for one guide at your `language.preferredLineLength`.",
+      "description": "Display guides at each of the listed character widths. Leave blank for one guide at your `editor.preferredLineLength`.",
       "type": "array",
       "items": {
         "type": "integer"
