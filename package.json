@@ -36,6 +36,7 @@
     "columns": {
       "title": "Columns",
       "description": "Display guides at each of the listed character widths. Leave blank for one guide at your `editor.preferredLineLength`.",
+      "scopeResolution": "grammar",
       "type": "array",
       "items": {
         "type": "integer"
@@ -51,6 +52,7 @@
     "enabled": {
       "title": "Enabled",
       "description": "Show the wrap guide in editors.",
+      "scopeResolution": "grammar",
       "type": "boolean",
       "default": true
     },
