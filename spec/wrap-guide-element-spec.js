@@ -26,6 +26,9 @@ describe("WrapGuideElement", function () {
 
   describe("When always shown", function () {
     beforeEach(async () => {
+      const languageText = await lumine.packages.activatePackage("language-text");
+      await languageText.resourceLoadPromise;
+
       lumine.config.set("wrap-guide.showWrapGuide", "always");
       workspaceElement = lumine.views.getView(lumine.workspace);
       workspaceElement.style.height = "200px";
@@ -295,7 +298,7 @@ describe("WrapGuideElement", function () {
         expect(initial).toBeGreaterThan(0);
         expect(wrapGuide).toBeVisible();
 
-        editor.setGrammar(lumine.grammars.grammarForScopeName("text.plain.null-grammar"));
+        editor.setGrammar(lumine.grammars.grammarForScopeName("text.plain"));
         expect(getLeftPosition(wrapGuide.firstChild)).toBeGreaterThan(initial);
         expect(wrapGuide).toBeVisible();
       });
