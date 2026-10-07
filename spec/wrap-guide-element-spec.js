@@ -279,6 +279,7 @@ describe("WrapGuideElement", function () {
 
     describe("when the editor's scroll left changes", () =>
       it("updates the wrap guide position to a relative position on screen", async () => {
+        editor.setSoftWrapped(false);
         editor.setText("a long line which causes the editor to scroll");
         editorElement.style.width = "100px";
 
