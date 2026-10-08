@@ -23,6 +23,13 @@
   "engines": {
     "lumine": "^1.0.0"
   },
+  "providedServices": {
+    "background-tips.provider": {
+      "versions": {
+        "1.0.0": "provideBackgroundTips"
+      }
+    }
+  },
   "specPackages": [
     "language-coffee-script"
   ],

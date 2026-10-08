@@ -54,6 +54,10 @@ lumine-text-editor .wrap-guide {
 }
 ```
 
+## Services
+
+- `background-tips.provider`: provided to Background Tips to describe configurable ruler columns.
+
 ## Contributing
 
 Got ideas to make this package better, found a bug, or want to help add new features? Just drop your thoughts on GitHub. Any feedback is welcome!

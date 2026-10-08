@@ -17,6 +17,19 @@ describe("Wrap Guide", () => {
   });
 
   describe("package activation", () => {
+    it("releases editor listener handles after repeated editor closure", async () => {
+      const main = lumine.packages.getActivePackage("wrap-guide").mainModule;
+      const initialSize = main.subscriptions.disposables.size;
+      for (let index = 0; index < 8; index++) {
+        const temporary = await lumine.workspace.open();
+        expect(main.wrapGuides.has(temporary)).toBe(true);
+        expect(main.subscriptions.disposables.size).toBe(initialSize + 1);
+        temporary.destroy();
+        expect(main.wrapGuides.has(temporary)).toBe(false);
+        expect(main.subscriptions.disposables.size).toBe(initialSize);
+      }
+    });
+
     it("appends a wrap guide to all existing and new editors", () => {
       expect(lumine.workspace.getTextEditors().length).toBe(1);
       expect(getWrapGuides().length).toBe(1);
