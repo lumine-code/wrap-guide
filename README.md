@@ -2,6 +2,8 @@
 
 Displays a vertical line in the editor to guide line length.
 
+Fork of [pulsar-edit/pulsar](https://github.com/pulsar-edit/pulsar) (`packages/wrap-guide`).
+
 ## Features
 
 - **Wrap guide line**: places a vertical line at a column so lines do not exceed a chosen width.
