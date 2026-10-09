@@ -20,23 +20,23 @@ To install `wrap-guide` search for it in the Install pane of the Lumine settings
 
 Disable the guide for a particular language through scoped configuration in your `config.json`. For example, to turn it off for GitHub-Flavored Markdown:
 
-```jsonc
+```json
 {
   ".source.gfm": {
     "wrap-guide": {
-      "enabled": false,
-    },
-  },
+      "enabled": false
+    }
+  }
 }
 ```
 
 Show multiple guide lines by listing the columns. The right-most line acts as your `editor.preferredLineLength`:
 
-```jsonc
+```json
 {
   "wrap-guide": {
-    "columns": [72, 80, 100, 120],
-  },
+    "columns": [72, 80, 100, 120]
+  }
 }
 ```
 
