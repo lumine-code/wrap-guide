@@ -61,13 +61,18 @@ describe("WrapGuideElement", function () {
         return wrapGuides;
       };
 
-      it("appends a wrap guide to all existing and new editors", function () {
+      it("appends a wrap guide to all existing and new editors", async function () {
         expect(lumine.workspace.getTextEditors().length).toBe(1);
 
         expect(getWrapGuides().length).toBe(1);
         expect(getLeftPosition(getWrapGuides()[0][0])).toBeGreaterThan(0);
 
-        lumine.workspace.getActivePane().splitRight({ copyActiveItem: true });
+        (
+          await lumine.workspace.copyPaneItem(lumine.workspace.getActivePane().getActiveItem(), {
+            sourcePane: lumine.workspace.getActivePane(),
+            splitDirection: "right",
+          })
+        ).pane;
         expect(lumine.workspace.getTextEditors().length).toBe(2);
         expect(getWrapGuides().length).toBe(2);
         expect(getLeftPosition(getWrapGuides()[0][0])).toBeGreaterThan(0);
@@ -95,7 +100,12 @@ describe("WrapGuideElement", function () {
         expect(positions[1]).toBeGreaterThan(positions[0]);
         expect(positions[2]).toBeGreaterThan(positions[1]);
 
-        lumine.workspace.getActivePane().splitRight({ copyActiveItem: true });
+        (
+          await lumine.workspace.copyPaneItem(lumine.workspace.getActivePane().getActiveItem(), {
+            sourcePane: lumine.workspace.getActivePane(),
+            splitDirection: "right",
+          })
+        ).pane;
         expect(lumine.workspace.getTextEditors().length).toBe(2);
         expect(getWrapGuides().length).toBe(2);
         const pane1_positions = getLeftPositions(getWrapGuides()[0]);

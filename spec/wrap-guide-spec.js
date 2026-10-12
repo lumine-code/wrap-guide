@@ -30,12 +30,17 @@ describe("Wrap Guide", () => {
       }
     });
 
-    it("appends a wrap guide to all existing and new editors", () => {
+    it("appends a wrap guide to all existing and new editors", async () => {
       expect(lumine.workspace.getTextEditors().length).toBe(1);
       expect(getWrapGuides().length).toBe(1);
       expect(getLeftPosition(getWrapGuides()[0])).toBeGreaterThan(0);
 
-      lumine.workspace.getActivePane().splitRight({ copyActiveItem: true });
+      (
+        await lumine.workspace.copyPaneItem(lumine.workspace.getActivePane().getActiveItem(), {
+          sourcePane: lumine.workspace.getActivePane(),
+          splitDirection: "right",
+        })
+      ).pane;
       expect(lumine.workspace.getTextEditors().length).toBe(2);
       expect(getWrapGuides().length).toBe(2);
       expect(getLeftPosition(getWrapGuides()[0])).toBeGreaterThan(0);
