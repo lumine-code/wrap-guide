@@ -12,6 +12,8 @@ Fork of [pulsar-edit/pulsar](https://github.com/pulsar-edit/pulsar) (`packages/w
 - **Scoped control**: enables or disables the guide per language through scoped configuration.
 - **Styling**: lets you change the guide's color and width with your own CSS.
 
+![Keep source lines within visible column guides.](.github/demo.png)
+
 ## Installation
 
 To install `wrap-guide` search for it in the Install pane of the Lumine settings, or run the command `lumine --install lumine-code/wrap-guide`.

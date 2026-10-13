@@ -1,0 +1,16 @@
+{
+  "title": "wrap-guide",
+  "description": "Keep source lines within visible column guides.",
+  "recordedOn": "2026-10-13",
+  "sourceRevision": "61eaaf5677fe35e84661148193a9edc4d36759d7",
+  "mode": "normal",
+  "fontSettings": "default",
+  "images": [
+    {
+      "file": "demo.png",
+      "label": "Keep source lines within visible column guides.",
+      "width": 1200,
+      "height": 760
+    }
+  ]
+}
