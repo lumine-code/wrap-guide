@@ -9,7 +9,6 @@ Fork of [pulsar-edit/pulsar](https://github.com/pulsar-edit/pulsar) (`packages/w
 - **Wrap guide line**: places a vertical line at a column so lines do not exceed a chosen width.
 - **Preferred line length**: follows the editor's effective preferred line length, including per-language settings and editor overrides.
 - **Soft wrap boundary**: can follow the editor's actual wrap column as the window width and wrap limits change.
-- **Multiple guides**: shows several independent visual guides at custom columns without changing the editor's preferred line length.
 - **Scoped control**: enables or disables the guide per language through scoped configuration.
 - **Styling**: lets you change the guide's color and width with your own CSS.
 
@@ -33,16 +32,6 @@ Disable the guide for a particular language through scoped configuration in your
 }
 ```
 
-Show multiple guide lines by listing the columns. These visual guides remain independent of `editor.preferredLineLength`; changing either setting preserves the other. Leave the list empty to follow the editor's effective preferred line length:
-
-```json
-{
-  "wrap-guide": {
-    "columns": [72, 80, 100, 120]
-  }
-}
-```
-
 ## Customization
 
 Change the guide's themeable color and width by adding CSS to your `styles.css`:
@@ -59,7 +48,7 @@ lumine-text-editor .wrap-guide {
 
 ## Services
 
-- `background-tips.provider`: provided to Background Tips to describe configurable ruler columns.
+- `background-tips.provider`: provided to Background Tips to describe the preferred length and soft wrap guides.
 
 ## Contributing
 

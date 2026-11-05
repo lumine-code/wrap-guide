@@ -17,9 +17,7 @@ module.exports = {
       timeout: 60000,
       async run(context) {
         const { lumine } = context;
-        {
-          lumine.config.set("wrap-guide.columns", [80]);
-        }
+        lumine.config.set("editor.preferredLineLength", 80);
       },
       ready() {
         return Boolean(document.querySelector("wrap-guide, .wrap-guide"));
@@ -28,6 +26,6 @@ module.exports = {
   ],
   async cleanup(context) {
     const { lumine } = context;
-    lumine.config.unset("wrap-guide.columns");
+    lumine.config.unset("editor.preferredLineLength");
   },
 };

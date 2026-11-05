@@ -11,10 +11,6 @@ const helpers = {
   getLeftPosition(element) {
     return parseInt(element.style.left);
   },
-
-  getLeftPositions(elements) {
-    return Array.prototype.map.call(elements, (element) => helpers.getLeftPosition(element));
-  },
 };
 
 module.exports = helpers;
