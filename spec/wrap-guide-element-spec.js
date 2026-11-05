@@ -192,24 +192,23 @@ describe("WrapGuideElement", function () {
       }));
 
     describe("when the preferredLineLength changes", () =>
-      it("updates the wrap guide positions", async function () {
+      it("preserves independent custom guide columns and their positions", async function () {
         const initial = [10, 15, 20, 30];
         lumine.config.set("wrap-guide.columns", initial, {
           scopeSelector: `.${editor.getGrammar().scopeName}`,
         });
 
         await waitForCondition(() => wrapGuide.children.length === initial.length, "wrap guides");
+        const positions = getLeftPositions(wrapGuide.children);
 
         lumine.config.set("editor.preferredLineLength", 15, {
           scopeSelector: `.${editor.getGrammar().scopeName}`,
         });
 
-        await waitForCondition(() => {
-          const columns = lumine.config.get("wrap-guide.columns", {
-            scope: editor.getRootScopeDescriptor(),
-          });
-          return columns != null && columns.length === 2 && columns[0] === 10 && columns[1] === 15;
-        }, "wrap guide columns to follow preferredLineLength");
+        expect(
+          lumine.config.get("wrap-guide.columns", { scope: editor.getRootScopeDescriptor() }),
+        ).toEqual(initial);
+        expect(getLeftPositions(wrapGuide.children)).toEqual(positions);
       }));
 
     describe("when the columns config changes", function () {
@@ -230,17 +229,12 @@ describe("WrapGuideElement", function () {
         expect(wrapGuide).toBeVisible();
       });
 
-      it("updates the preferredLineLength", async () => {
-        const initial = lumine.config.get("editor.preferredLineLength", {
-          scope: editor.getRootScopeDescriptor(),
-        });
+      it("leaves the preferred line length unchanged", async () => {
+        const initial = editor.getPreferredLineLength();
         lumine.config.set("wrap-guide.columns", [initial, initial + 10]);
         await editorElement.getComponent().getNextUpdatePromise();
 
-        const length = lumine.config.get("editor.preferredLineLength", {
-          scope: editor.getRootScopeDescriptor(),
-        });
-        expect(length).toBe(initial + 10);
+        expect(editor.getPreferredLineLength()).toBe(initial);
       });
 
       it("keeps guide positions unique and in ascending order", async () => {
@@ -270,20 +264,40 @@ describe("WrapGuideElement", function () {
         expect(positions[2]).toBeGreaterThan(positions[1]);
         expect(wrapGuide).toBeVisible();
       });
+    });
 
-      it("leaves alone preferredLineLength if modifyPreferredLineLength is false", async () => {
-        const initial = lumine.config.get("editor.preferredLineLength", {
+    describe("when the editor has a preferred length override", () => {
+      it("updates the fallback guide from the model without writing configuration", async () => {
+        const configured = lumine.config.get("editor.preferredLineLength", {
           scope: editor.getRootScopeDescriptor(),
         });
-        lumine.config.set("wrap-guide.modifyPreferredLineLength", false);
+        const column = configured + 20;
+        spyOn(lumine.config, "set").and.callThrough();
 
-        lumine.config.set("wrap-guide.columns", [initial, initial + 10]);
-        await editorElement.getComponent().getNextUpdatePromise();
+        await editor.update({ preferredLineLength: column });
 
-        const length = lumine.config.get("editor.preferredLineLength", {
-          scope: editor.getRootScopeDescriptor(),
-        });
-        expect(length).toBe(initial);
+        expect(wrapGuide.getDefaultColumn()).toBe(column);
+        expect(getLeftPosition(wrapGuide.firstChild)).toBe(
+          Math.round(editorElement.getDefaultCharacterWidth() * column),
+        );
+        expect(lumine.config.set).not.toHaveBeenCalled();
+        expect(
+          lumine.config.get("editor.preferredLineLength", {
+            scope: editor.getRootScopeDescriptor(),
+          }),
+        ).toBe(configured);
+      });
+
+      it("keeps custom columns unchanged when the model's preferred length changes", async () => {
+        lumine.config.set("wrap-guide.columns", [40, 120]);
+        const positions = getLeftPositions(wrapGuide.children);
+        spyOn(lumine.config, "set").and.callThrough();
+
+        await editor.update({ preferredLineLength: 60 });
+
+        expect(getLeftPositions(wrapGuide.children)).toEqual(positions);
+        expect(lumine.config.get("wrap-guide.columns")).toEqual([40, 120]);
+        expect(lumine.config.set).not.toHaveBeenCalled();
       });
     });
 
@@ -303,22 +317,37 @@ describe("WrapGuideElement", function () {
       }));
 
     describe("when the editor's grammar changes", function () {
-      it("updates the wrap guide position", function () {
+      it("updates the wrap guide position", async function () {
         lumine.config.set("editor.preferredLineLength", 20, { scopeSelector: ".source.js" });
+        lumine.config.set("editor.preferredLineLength", 80, { scopeSelector: ".text.plain" });
+        await waitForCondition(() => editor.getPreferredLineLength() === 20, "JavaScript width");
         const initial = getLeftPosition(wrapGuide.firstChild);
         expect(initial).toBeGreaterThan(0);
         expect(wrapGuide).toBeVisible();
 
         editor.setGrammar(lumine.grammars.grammarForScopeName("text.plain"));
+        await waitForCondition(() => editor.getPreferredLineLength() === 80, "plain text width");
         expect(getLeftPosition(wrapGuide.firstChild)).toBeGreaterThan(initial);
+        expect(getLeftPosition(wrapGuide.firstChild)).toBe(
+          Math.round(editorElement.getDefaultCharacterWidth() * 80),
+        );
         expect(wrapGuide).toBeVisible();
       });
 
-      it("listens for preferredLineLength updates for the new grammar", function () {
+      it("listens for preferredLineLength updates for the new grammar", async function () {
+        lumine.config.set("editor.preferredLineLength", 60, { scopeSelector: ".source.coffee" });
         editor.setGrammar(lumine.grammars.grammarForScopeName("source.coffee"));
+        await waitForCondition(() => editor.getPreferredLineLength() === 60, "CoffeeScript width");
         const initial = getLeftPosition(wrapGuide.firstChild);
         lumine.config.set("editor.preferredLineLength", 20, { scopeSelector: ".source.coffee" });
+        await waitForCondition(
+          () => editor.getPreferredLineLength() === 20,
+          "updated CoffeeScript width",
+        );
         expect(getLeftPosition(wrapGuide.firstChild)).toBeLessThan(initial);
+        expect(getLeftPosition(wrapGuide.firstChild)).toBe(
+          Math.round(editorElement.getDefaultCharacterWidth() * 20),
+        );
       });
 
       it("listens for wrap-guide.enabled updates for the new grammar", function () {

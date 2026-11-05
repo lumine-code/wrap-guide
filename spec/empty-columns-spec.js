@@ -4,7 +4,6 @@ describe("Wrap Guide column fallback", () => {
     for (const method of ["openPath", "openExternal", "openApplication", "showItemInFolder"])
       spyOn(lumine.shell, method).and.resolveTo();
     spyOn(lumine.application, "openWindow").and.resolveTo();
-    lumine.config.set("wrap-guide.modifyPreferredLineLength", false);
     lumine.config.set("wrap-guide.showWrapGuide", "always");
     lumine.config.set("editor.preferredLineLength", 80);
     lumine.config.set("wrap-guide.columns", [20, 40]);

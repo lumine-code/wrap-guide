@@ -3,7 +3,6 @@ describe("Wrap Guide column configuration ownership", () => {
 
   beforeEach(async () => {
     lumine.config.set("wrap-guide.columns", []);
-    lumine.config.set("wrap-guide.modifyPreferredLineLength", false);
     await lumine.packages.activatePackage("wrap-guide");
     editor = await lumine.workspace.open();
     scope = editor.getRootScopeDescriptor();
@@ -16,7 +15,6 @@ describe("Wrap Guide column configuration ownership", () => {
     lumine.config.unset("wrap-guide.columns", { scopeSelector: selector });
     lumine.config.unset("editor.preferredLineLength", { scopeSelector: selector });
     lumine.config.unset("wrap-guide.columns");
-    lumine.config.unset("wrap-guide.modifyPreferredLineLength");
     lumine.config.unset("editor.preferredLineLength");
   });
 
@@ -42,11 +40,40 @@ describe("Wrap Guide column configuration ownership", () => {
     ).toBe(true);
   });
 
-  it("retains rightmost-column preferred length synchronization for a scoped setting", () => {
-    lumine.config.set("wrap-guide.modifyPreferredLineLength", true);
+  it("keeps scoped visual columns independent of the preferred line length", () => {
+    const preferredLineLength = editor.getPreferredLineLength();
     lumine.config.set("wrap-guide.columns", [40, 70], { scopeSelector: selector });
     expect(lumine.config.get("wrap-guide.columns")).toEqual([]);
-    expect(lumine.config.get("editor.preferredLineLength", { scope })).toBe(70);
+    expect(editor.getPreferredLineLength()).toBe(preferredLineLength);
+    expect(
+      lumine.config
+        .getAll("editor.preferredLineLength", { scope })
+        .every((source) => source.scopeSelector === "*"),
+    ).toBe(true);
+  });
+
+  it("preserves global inheritance across successive preferred length changes", () => {
+    lumine.config.set("wrap-guide.columns", [72, 120]);
+    lumine.config.set("editor.preferredLineLength", 100);
+    lumine.config.set("editor.preferredLineLength", 90);
+
+    expect(editor.getPreferredLineLength()).toBe(90);
+    expect(lumine.config.get("wrap-guide.columns", { scope })).toEqual([72, 120]);
+    for (const key of ["editor.preferredLineLength", "wrap-guide.columns"]) {
+      expect(
+        lumine.config.getAll(key, { scope }).every((source) => source.scopeSelector === "*"),
+      ).toBe(true);
+    }
+  });
+
+  it("does not write configuration in response to a preferred length change", () => {
+    lumine.config.set("wrap-guide.columns", [72, 120]);
+    spyOn(lumine.config, "set").and.callThrough();
+
+    lumine.config.set("editor.preferredLineLength", 90);
+
+    expect(lumine.config.set.calls.allArgs()).toEqual([["editor.preferredLineLength", 90]]);
+    expect(lumine.config.get("wrap-guide.columns", { scope })).toEqual([72, 120]);
   });
 
   it("lets removal of the original scoped setting restore inherited columns", () => {

@@ -29,6 +29,5 @@ module.exports = {
   async cleanup(context) {
     const { lumine } = context;
     lumine.config.unset("wrap-guide.columns");
-    lumine.config.unset("editor.preferredLineLength");
   },
 };

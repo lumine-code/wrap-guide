@@ -43,19 +43,13 @@
   "configSchema": {
     "columns": {
       "title": "Columns",
-      "description": "Display guides at each of the listed character widths. Leave blank for one guide at your `editor.preferredLineLength`. The soft wrap column mode uses the editor's actual wrap column instead.",
+      "description": "Display independent visual guides at these character widths without changing the editor's preferred line length. Leave blank for one guide at the editor's preferred line length. The soft wrap column mode uses the editor's actual wrap column instead.",
       "scopeResolution": "grammar",
       "type": "array",
       "items": {
         "type": "integer"
       },
       "default": []
-    },
-    "modifyPreferredLineLength": {
-      "title": "Modify Preferred Line Length",
-      "description": "Modify the Editor's Preferred Line Length when changing Wrap Guide's Columns setting.",
-      "type": "boolean",
-      "default": true
     },
     "enabled": {
       "title": "Enabled",
