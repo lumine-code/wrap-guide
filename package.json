@@ -43,7 +43,7 @@
   "configSchema": {
     "columns": {
       "title": "Columns",
-      "description": "Display guides at each of the listed character widths. Leave blank for one guide at your `editor.preferredLineLength`.",
+      "description": "Display guides at each of the listed character widths. Leave blank for one guide at your `editor.preferredLineLength`. The soft wrap column mode uses the editor's actual wrap column instead.",
       "scopeResolution": "grammar",
       "type": "array",
       "items": {
@@ -66,7 +66,7 @@
     },
     "showWrapGuide": {
       "title": "Show Wrap Guide",
-      "description": "Choose when to show the wrap guide.",
+      "description": "Show the configured ruler columns, optionally only while wrapping, or follow the editor's actual soft wrap column.",
       "type": "string",
       "enum": [
         {
@@ -78,8 +78,8 @@
           "description": "When soft wrap is enabled"
         },
         {
-          "value": "atPreferredLineLength",
-          "description": "When soft wrap at preferred line length is enabled"
+          "value": "atSoftWrapColumn",
+          "description": "At the soft wrap column when wrapping is enabled"
         }
       ],
       "default": "always"

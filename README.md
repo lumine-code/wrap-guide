@@ -8,6 +8,7 @@ Fork of [pulsar-edit/pulsar](https://github.com/pulsar-edit/pulsar) (`packages/w
 
 - **Wrap guide line**: places a vertical line at a column so lines do not exceed a chosen width.
 - **Preferred line length**: uses the `editor.preferredLineLength` value, falling back to the 80th column.
+- **Soft wrap boundary**: can follow the editor's actual wrap column as the window width and wrap limits change.
 - **Multiple guides**: shows several guide lines at custom columns.
 - **Scoped control**: enables or disables the guide per language through scoped configuration.
 - **Styling**: lets you change the guide's color and width with your own CSS.

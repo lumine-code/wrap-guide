@@ -357,242 +357,110 @@ describe("WrapGuideElement", function () {
     });
   });
 
-  describe("When only shown if wrapping at preferred line length", () => {
+  describe("When following the soft wrap column", () => {
     beforeEach(async () => {
-      lumine.config.set("wrap-guide.showWrapGuide", "atPreferredLineLength");
-
-      await lumine.packages.activatePackage("wrap-guide");
+      lumine.config.set("wrap-guide.showWrapGuide", "atSoftWrapColumn");
+      lumine.config.set("editor.softWrap", true);
+      lumine.config.set("editor.softWrapMaxColumn", 80);
+      workspaceElement = lumine.views.getView(lumine.workspace);
+      workspaceElement.style.height = "200px";
+      workspaceElement.style.width = "1500px";
+      jasmine.attachToDOM(workspaceElement);
 
       await lumine.packages.activatePackage("language-javascript");
-
       await lumine.packages.activatePackage("language-coffee-script");
-
-      await lumine.workspace.open("sample.txt");
-      await lumine.workspace.open("sample.js");
+      await lumine.packages.activatePackage("wrap-guide");
+      editor = await lumine.workspace.open("sample.js");
+      editorElement = editor.getElement();
+      wrapGuide = editorElement.querySelector(".wrap-guide-container");
+      await conditionPromise(() => editorElement.getDefaultCharacterWidth() > 0);
     });
 
-    describe("while the wrapping at preferred line length is active", () => {
-      beforeEach(async () => {
-        lumine.config.set("editor.softWrap", true);
-        lumine.config.set("editor.softWrapAtPreferredLineLength", true);
-        workspaceElement = lumine.views.getView(lumine.workspace);
-        workspaceElement.style.height = "200px";
-        workspaceElement.style.width = "1500px";
+    function expectGuideAt(column) {
+      expect(wrapGuide.children.length).toBe(1);
+      expect(getLeftPosition(wrapGuide.firstChild)).toBe(
+        Math.round(
+          column * editorElement.getDefaultCharacterWidth() - editorElement.getScrollLeft(),
+        ),
+      );
+      expect(wrapGuide).toBeVisible();
+    }
 
-        jasmine.attachToDOM(workspaceElement);
+    it("follows the model's wrap column independently of ruler columns and preferred line length", async () => {
+      lumine.config.set("wrap-guide.columns", [40, 120]);
+      await editor.update({ softWrapMinColumn: 64, softWrapMaxColumn: 64 });
 
-        editor = lumine.workspace.getActiveTextEditor();
-        editorElement = editor.getElement();
-        wrapGuide = editorElement.querySelector(".wrap-guide-container");
-      });
-
-      it("should generate wrap-guides as usual until either wrappings are deactivated", () => {
-        expect(lumine.workspace.getTextEditors().length).toBe(2);
-        function getWrapGuides() {
-          const wrapGuides = [];
-          lumine.workspace.getTextEditors().forEach((editor) => {
-            const guides = editor.getElement().querySelectorAll(".wrap-guide");
-            if (guides && guides.length > 0) {
-              return wrapGuides.push(guides);
-            }
-          });
-          return wrapGuides;
-        }
-        const scopeDescriptor = editor.getRootScopeDescriptor();
-
-        expect([
-          lumine.config.get("editor.softWrap"),
-          lumine.config.get("editor.softWrapAtPreferredLineLength"),
-        ]).toEqual([true, true]);
-        expect(getWrapGuides().length).toBe(2);
-
-        lumine.config.set("editor.softWrap", false, {
-          scopeSelector: `.${editor.getGrammar().scopeName}`,
-        });
-
-        expect([
-          lumine.config.get("editor.softWrap"),
-          lumine.config.get("editor.softWrap", { scope: scopeDescriptor }),
-        ]).toEqual([true, false]);
-
-        expect(getWrapGuides().length).toBe(1);
-
-        lumine.config.set("editor.softWrap", true, {
-          scopeSelector: `.${editor.getGrammar().scopeName}`,
-        });
-
-        expect(lumine.config.get("editor.softWrap", { scope: scopeDescriptor })).toBe(true);
-        expect(getWrapGuides().length).toBe(2);
-
-        lumine.config.set("editor.softWrapAtPreferredLineLength", false, {
-          scopeSelector: `.${editor.getGrammar().scopeName}`,
-        });
-
-        expect([
-          lumine.config.get("editor.softWrapAtPreferredLineLength"),
-          lumine.config.get("editor.softWrapAtPreferredLineLength", { scope: scopeDescriptor }),
-        ]).toEqual([true, false]);
-
-        expect(getWrapGuides().length).toBe(1);
-
-        lumine.config.unset("editor.softWrapAtPreferredLineLength", {
-          scopeSelector: `.${editor.getGrammar().scopeName}`,
-        });
-
-        expect(
-          lumine.config.get("editor.softWrapAtPreferredLineLength", { scope: scopeDescriptor }),
-        ).toBe(true);
-
-        expect(getWrapGuides().length).toBe(2);
-
-        lumine.config.set("editor.softWrapAtPreferredLineLength", false);
-
-        expect([
-          lumine.config.get("editor.softWrapAtPreferredLineLength"),
-          lumine.config.get("editor.softWrapAtPreferredLineLength", { scope: scopeDescriptor }),
-        ]).toEqual([false, false]);
-
-        expect(getWrapGuides().length).toBe(0);
-      });
-
-      it("should adapt when changing the grammar", () => {
-        expect(lumine.workspace.getTextEditors().length).toBe(2);
-        function getWrapGuides() {
-          const wrapGuides = [];
-          lumine.workspace.getTextEditors().forEach((editor) => {
-            const guides = editor.getElement().querySelectorAll(".wrap-guide");
-            if (guides && guides.length > 0) {
-              return wrapGuides.push(guides);
-            }
-          });
-          return wrapGuides;
-        }
-        const scopeDescriptor = editor.getRootScopeDescriptor();
-
-        expect([
-          lumine.config.get("editor.softWrap"),
-          lumine.config.get("editor.softWrapAtPreferredLineLength"),
-        ]).toEqual([true, true]);
-        expect(getWrapGuides().length).toBe(2);
-
-        lumine.config.set("editor.softWrapAtPreferredLineLength", false, {
-          scopeSelector: `.${editor.getGrammar().scopeName}`,
-        });
-
-        expect([
-          lumine.config.get("editor.softWrapAtPreferredLineLength"),
-          lumine.config.get("editor.softWrapAtPreferredLineLength", { scope: scopeDescriptor }),
-        ]).toEqual([true, false]);
-
-        expect(getWrapGuides().length).toBe(1);
-
-        editor.setGrammar(lumine.grammars.grammarForScopeName("source.coffee"));
-        const new_scopeDescriptor = editor.getRootScopeDescriptor();
-
-        expect([
-          scopeDescriptor != new_scopeDescriptor,
-          lumine.config.get("editor.softWrapAtPreferredLineLength", {
-            scope: new_scopeDescriptor,
-          }),
-        ]).toEqual([true, true]);
-
-        expect(getWrapGuides().length).toBe(2);
-
-        lumine.config.set("editor.softWrapAtPreferredLineLength", false, {
-          scopeSelector: `.${editor.getGrammar().scopeName}`,
-        });
-
-        expect(getWrapGuides().length).toBe(1);
-      });
+      expect(lumine.config.get("editor.softWrapMaxColumn")).toBe(80);
+      expectGuideAt(64);
+      lumine.config.set("editor.preferredLineLength", 100);
+      expectGuideAt(64);
     });
 
-    describe("while the wrapping is inactive", () => {
-      beforeEach(async () => {
-        lumine.config.set("editor.softWrap", false);
-        lumine.config.set("editor.softWrapAtPreferredLineLength", false);
-        workspaceElement = lumine.views.getView(lumine.workspace);
-        workspaceElement.style.height = "200px";
-        workspaceElement.style.width = "1500px";
+    it("updates when minimum and maximum limits change without toggling wrapping", async () => {
+      await editor.update({ softWrapMinColumn: 90, softWrapMaxColumn: 90 });
+      expectGuideAt(90);
 
-        jasmine.attachToDOM(workspaceElement);
+      await editor.update({ softWrapMinColumn: 90, softWrapMaxColumn: 60 });
+      expect(editor.isSoftWrapped()).toBe(true);
+      expectGuideAt(60);
+    });
 
-        editor = lumine.workspace.getActiveTextEditor();
-        editorElement = editor.getElement();
-        wrapGuide = editorElement.querySelector(".wrap-guide-container");
-      });
+    it("follows the viewport when it becomes narrower than the maximum", async () => {
+      await conditionPromise(() => editor.getSoftWrapColumn() === 80);
+      expectGuideAt(80);
 
-      it("should not generate wrap-guides until wrapping at preferred line length is reactivated", () => {
-        expect(lumine.workspace.getTextEditors().length).toBe(2);
-        function getWrapGuides() {
-          const wrapGuides = [];
-          lumine.workspace.getTextEditors().forEach((editor) => {
-            const guides = editor.getElement().querySelectorAll(".wrap-guide");
-            if (guides && guides.length > 0) {
-              return wrapGuides.push(guides);
-            }
-          });
-          return wrapGuides;
-        }
-        const scopeDescriptor = editor.getRootScopeDescriptor();
+      workspaceElement.style.width = "350px";
+      await conditionPromise(() => editor.getSoftWrapColumn() < 80);
+      expectGuideAt(editor.getSoftWrapColumn());
+    });
 
-        expect([
-          lumine.config.get("editor.softWrap"),
-          lumine.config.get("editor.softWrapAtPreferredLineLength"),
-        ]).toEqual([false, false]);
-        expect(getWrapGuides().length).toBe(0);
+    it("keeps an offscreen minimum-width boundary aligned during horizontal scrolling", async () => {
+      workspaceElement.style.width = "350px";
+      await editor.update({ softWrapMinColumn: 100, softWrapMaxColumn: 100 });
+      editor.setText("A long line of words ".repeat(20));
+      await conditionPromise(() => editorElement.component.getMaxScrollLeft() > 25);
 
-        lumine.config.set("editor.softWrap", true, {
-          scopeSelector: `.${editor.getGrammar().scopeName}`,
-        });
+      expectGuideAt(100);
+      const initial = getLeftPosition(wrapGuide.firstChild);
+      expect(initial).toBeGreaterThan(editorElement.clientWidth);
 
-        expect([
-          lumine.config.get("editor.softWrap"),
-          lumine.config.get("editor.softWrap", { scope: scopeDescriptor }),
-        ]).toEqual([false, true]);
+      editorElement.setScrollLeft(25);
+      expect(getLeftPosition(wrapGuide.firstChild)).toBe(initial - 25);
+      expectGuideAt(100);
+    });
 
-        expect(getWrapGuides().length).toBe(0);
+    it("hides for a local wrap override even when the unwrapped safety boundary is finite", async () => {
+      await editor.update({ unwrappedLineLengthLimit: 50 });
+      editor.setSoftWrapped(false);
+      expect(lumine.config.get("editor.softWrap")).toBe(true);
+      expect(editor.getSoftWrapColumn()).toBe(50);
+      expect(wrapGuide.children.length).toBe(0);
+      expect(wrapGuide).not.toBeVisible();
 
-        lumine.config.set("editor.softWrapAtPreferredLineLength", true, {
-          scopeSelector: `.${editor.getGrammar().scopeName}`,
-        });
+      editor.setSoftWrapped(true);
+      expectGuideAt(editor.getSoftWrapColumn());
+    });
 
-        expect([
-          lumine.config.get("editor.softWrapAtPreferredLineLength"),
-          lumine.config.get("editor.softWrapAtPreferredLineLength", { scope: scopeDescriptor }),
-        ]).toEqual([false, true]);
+    it("follows scoped limits when the grammar changes", async () => {
+      lumine.config.set("editor.softWrapMaxColumn", 60, { scopeSelector: ".source.js" });
+      lumine.config.set("editor.softWrapMaxColumn", 90, { scopeSelector: ".source.coffee" });
+      await conditionPromise(() => editor.getSoftWrapColumn() === 60);
+      expectGuideAt(60);
 
-        expect(getWrapGuides().length).toBe(1);
-      });
+      editor.setGrammar(lumine.grammars.grammarForScopeName("source.coffee"));
+      await conditionPromise(() => editor.getSoftWrapColumn() === 90);
+      expectGuideAt(90);
+    });
 
-      it("should adapt when changing to another mod", () => {
-        expect(lumine.workspace.getTextEditors().length).toBe(2);
-        function getWrapGuides() {
-          const wrapGuides = [];
-          lumine.workspace.getTextEditors().forEach((editor) => {
-            const guides = editor.getElement().querySelectorAll(".wrap-guide");
-            if (guides && guides.length > 0) {
-              return wrapGuides.push(guides);
-            }
-          });
-          return wrapGuides;
-        }
+    it("returns to the configured ruler columns when the display mode changes", () => {
+      lumine.config.set("wrap-guide.columns", [40, 120]);
+      expectGuideAt(editor.getSoftWrapColumn());
 
-        expect([
-          lumine.config.get("editor.softWrap"),
-          lumine.config.get("editor.softWrapAtPreferredLineLength"),
-        ]).toEqual([false, false]);
-        expect(getWrapGuides().length).toBe(0);
-
-        lumine.config.set("editor.softWrap", true, {
-          scopeSelector: `.${editor.getGrammar().scopeName}`,
-        });
-
-        expect(getWrapGuides().length).toBe(0);
-
-        lumine.config.set("wrap-guide.showWrapGuide", "wrapping");
-
-        expect(getWrapGuides().length).toBe(1);
-      });
+      lumine.config.set("wrap-guide.showWrapGuide", "wrapping");
+      expect(wrapGuide.children.length).toBe(2);
+      expect(getLeftPositions(wrapGuide.children)).toEqual(
+        [40, 120].map((column) => Math.round(column * editorElement.getDefaultCharacterWidth())),
+      );
     });
   });
 
